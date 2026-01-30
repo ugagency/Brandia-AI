@@ -6,6 +6,8 @@ export interface BusinessProfile {
   region: string;
   objective: 'vender' | 'atrair' | 'autoridade';
   style: 'serio' | 'descontraido' | 'popular';
+  logoUrl?: string; // Base64 logo
+  manualColors?: string[]; // Colors extracted or chosen
 }
 
 export interface BrandIdentity {
@@ -35,10 +37,29 @@ export interface PostItem {
   script?: string;
   bestTime: string;
   platform: 'Instagram' | 'TikTok' | 'WhatsApp';
+  status: 'pending' | 'posted';
+  isTrend?: boolean;
+  dayOfMonth: number;
+}
+
+export interface Competitor {
+  name: string;
+  postTypes: string;
+  engagementLevel: string;
+  opportunity: string;
 }
 
 export interface MarketingPlan {
   identity: BrandIdentity;
   strategy: ContentStrategy;
   calendar: PostItem[];
+  competitors: Competitor[];
+}
+
+export interface Project {
+  id: string;
+  projectName: string;
+  createdAt: string;
+  profile: BusinessProfile;
+  plan: MarketingPlan;
 }
