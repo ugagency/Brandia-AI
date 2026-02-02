@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { MarketingPlan, BusinessProfile, PostItem, Competitor } from '../types';
+import { MarketingPlan, BusinessProfile, PostItem, Competitor, PlatformAdaptation, Platform } from '../types';
 
 interface DashboardProps {
   plan: MarketingPlan;
@@ -23,7 +23,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   isSaving,
   isExtending
 }) => {
-  const [activeTab, setActiveTab] = useState<'marca' | 'conteudo' | 'execucao' | 'concorrencia'>('execucao');
+  const [activeTab, setActiveTab] = useState<'marca' | 'conteudo' | 'execucao' | 'concorrencia' | 'canais'>('execucao');
   const [selectedPost, setSelectedPost] = useState<PostItem | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
   const [tempProjectName, setTempProjectName] = useState(profile.name);
@@ -36,25 +36,35 @@ const Dashboard: React.FC<DashboardProps> = ({
   const CopyButton = ({ text }: { text: string }) => (
     <button 
       onClick={() => navigator.clipboard.writeText(text)}
-      className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded font-medium transition-colors no-print"
+      className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded font-bold transition-colors no-print border border-slate-700"
     >
-      Copiar
+      COPIAR
     </button>
   );
 
-  // Group posts by day for the monthly grid
   const postsByDay = plan.calendar.reduce((acc, post) => {
     acc[post.dayOfMonth] = post;
     return acc;
   }, {} as Record<number, PostItem>);
 
-  const calendarDays = Array.from({ length: 35 }, (_, i) => i + 1);
+  const calendarDays = Array.from({ length: Math.max(30, ...plan.calendar.map(p => p.dayOfMonth)) }, (_, i) => i + 1);
+
+  const getPlatformIcon = (platform: Platform) => {
+    switch(platform) {
+      case 'Instagram': return <span className="text-[10px] bg-gradient-to-tr from-yellow-400 to-purple-600 px-2 py-0.5 rounded text-white font-bold">IG</span>;
+      case 'TikTok': return <span className="text-[10px] bg-white text-black px-2 py-0.5 rounded font-bold">TK</span>;
+      case 'LinkedIn': return <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded font-bold">IN</span>;
+      case 'WhatsApp': return <span className="text-[10px] bg-green-500 text-white px-2 py-0.5 rounded font-bold">WA</span>;
+      case 'YouTube Shorts': return <span className="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold">YT</span>;
+      default: return null;
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 pb-20">
-      {/* Header Profile */}
-      <div className="bg-white rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-center gap-6 shadow-sm border border-slate-100">
-        <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 text-3xl font-bold overflow-hidden">
+      {/* Header */}
+      <div className="bg-slate-900 rounded-[2.5rem] p-8 mb-8 flex flex-col md:flex-row items-center gap-8 shadow-2xl border border-slate-800">
+        <div className="w-24 h-24 bg-slate-800 rounded-3xl flex items-center justify-center text-green-400 text-4xl font-black overflow-hidden shadow-inner border border-slate-700">
           {profile.logoUrl ? <img src={profile.logoUrl} className="w-full h-full object-contain" /> : profile.name.charAt(0)}
         </div>
         <div className="text-center md:text-left flex-1">
@@ -62,188 +72,154 @@ const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center gap-2 justify-center md:justify-start">
               <input 
                 type="text" 
-                className="text-2xl font-extrabold text-slate-900 border-b-2 border-indigo-500 outline-none"
+                className="text-3xl font-black text-white border-b-2 border-green-500 outline-none bg-transparent max-w-xs"
                 value={tempProjectName}
                 onChange={e => setTempProjectName(e.target.value)}
                 autoFocus
               />
-              <button onClick={handleSave} className="bg-indigo-600 text-white p-2 rounded-lg">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+              <button onClick={handleSave} className="bg-green-500 text-slate-950 p-2 rounded-lg">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-3 justify-center md:justify-start group">
-              <h1 className="text-2xl font-extrabold text-slate-900">{tempProjectName}</h1>
-              <button onClick={() => setIsRenaming(true)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-indigo-600 transition-all no-print">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+              <h1 className="text-3xl font-black text-white tracking-tighter">{tempProjectName}</h1>
+              <button onClick={() => setIsRenaming(true)} className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-green-400 transition-all no-print">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
               </button>
             </div>
           )}
-          <p className="text-slate-500 font-medium">{profile.businessType} • {profile.region}</p>
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">{profile.businessType} • {profile.region}</p>
         </div>
         
         <div className="flex flex-wrap items-center justify-center gap-4 no-print">
            <div className="flex gap-2">
              {plan.identity.suggestedColors.map((color, i) => (
-               <div key={i} className="w-8 h-8 rounded-lg shadow-inner border border-slate-100" style={{ backgroundColor: color }} title={color} />
+               <div key={i} className="w-10 h-10 rounded-xl shadow-lg border-2 border-slate-800" style={{ backgroundColor: color }} />
              ))}
            </div>
-           <button 
-            onClick={onExportPDF}
-            className="bg-white border-2 border-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-50 transition-all"
-           >
-             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+           <button onClick={onExportPDF} className="bg-slate-800 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-slate-700 transition-all border border-slate-700">
              PDF
            </button>
-           <button 
-            onClick={handleSave}
-            disabled={isSaving}
-            className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50"
-           >
-             {isSaving ? 'Salvando...' : 'Salvar Plano'}
-             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+           <button onClick={handleSave} disabled={isSaving} className="bg-green-500 text-slate-950 px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:brightness-110 shadow-lg shadow-green-500/10">
+             {isSaving ? 'SALVANDO...' : 'SALVAR PLANO'}
            </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="no-print flex bg-white p-2 rounded-2xl shadow-sm border border-slate-100 mb-8 sticky top-4 z-10 overflow-x-auto">
-        {(['marca', 'conteudo', 'concorrencia', 'execucao'] as const).map((tab) => (
+      <div className="no-print flex bg-slate-900 p-2 rounded-2xl shadow-xl border border-slate-800 mb-8 sticky top-4 z-10 overflow-x-auto">
+        {(['marca', 'conteudo', 'concorrencia', 'canais', 'execucao'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`whitespace-nowrap flex-1 py-3 px-4 rounded-xl font-bold capitalize transition-all ${
-              activeTab === tab ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-slate-50'
+            className={`whitespace-nowrap flex-1 py-4 px-6 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${
+              activeTab === tab ? 'bg-gradient-to-r from-green-500 to-cyan-500 text-slate-950 shadow-lg shadow-green-500/10' : 'text-slate-500 hover:text-white'
             }`}
           >
-            {tab === 'marca' ? 'Minha Marca' : tab === 'conteudo' ? 'Estratégia' : tab === 'concorrencia' ? 'Concorrência' : 'Calendário Mensal'}
+            {tab === 'marca' ? 'Marca' : tab === 'conteudo' ? 'Estratégia' : tab === 'concorrencia' ? 'Rivais' : tab === 'canais' ? 'Omnichannel' : 'Calendário'}
           </button>
         ))}
       </div>
 
-      {/* PRINT VERSION (Hidden in UI) */}
-      <div className="print-only p-8">
-        <h1 className="text-4xl font-black mb-4">Relatório de Marketing - {tempProjectName}</h1>
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold border-b-2 mb-4">1. Identidade</h2>
-          <p><strong>Bio:</strong> {plan.identity.bio}</p>
-          <p><strong>Promessa:</strong> {plan.identity.promise}</p>
-        </section>
-        <section className="page-break">
-          <h2 className="text-2xl font-bold border-b-2 mb-4">2. Agenda Mensal ({plan.calendar.length} posts)</h2>
-          <div className="space-y-4">
-            {plan.calendar.map(post => (
-              <div key={post.id} className="border p-4 rounded-xl">
-                <p className="font-bold">Dia {post.dayOfMonth}: {post.topic} ({post.platform})</p>
-                <p className="text-sm italic">{post.hook}</p>
-                <p className="text-xs mt-2">{post.caption}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      {/* INTERACTIVE UI */}
       <div className="no-print">
-        {activeTab === 'marca' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="space-y-6">
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-bold text-slate-900 uppercase text-sm tracking-widest">Bio Otimizada (Instagram)</h3>
-                  <CopyButton text={plan.identity.bio} />
-                </div>
-                <p className="text-slate-700 italic leading-relaxed whitespace-pre-line">{plan.identity.bio}</p>
-              </div>
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <h3 className="font-bold text-slate-900 uppercase text-sm tracking-widest mb-4">Promessa Irresistível</h3>
-                <p className="text-lg font-semibold text-indigo-600 leading-tight">"{plan.identity.promise}"</p>
-              </div>
-            </div>
-            <div className="space-y-6">
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <h3 className="font-bold text-slate-900 uppercase text-sm tracking-widest mb-4">Posicionamento</h3>
-                <p className="text-slate-600 leading-relaxed">{plan.identity.description}</p>
-              </div>
-              <div className="bg-indigo-600 p-8 rounded-3xl text-white shadow-xl shadow-indigo-200">
-                <h3 className="font-bold uppercase text-sm tracking-widest mb-4 opacity-80">Estilo Visual</h3>
-                <p className="text-xl font-medium leading-relaxed mb-6">{plan.identity.visualStyle}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'concorrencia' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {plan.competitors.map((comp, i) => (
-              <div key={i} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
-                <h4 className="font-bold text-slate-900 mb-2">{comp.name}</h4>
-                <div className="space-y-4">
-                  <p className="text-sm text-slate-600">{comp.postTypes}</p>
-                  <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                    <p className="text-sm text-indigo-900 font-medium italic">"{comp.opportunity}"</p>
+        {activeTab === 'canais' && (
+          <div className="space-y-8 animate-in fade-in duration-500">
+             <div className="bg-slate-900 border border-slate-800 p-10 rounded-[2.5rem]">
+                <h2 className="text-3xl font-black text-white mb-2 tracking-tighter">OMNICHANNEL ADAPTATION</h2>
+                <p className="text-slate-400">Conteúdo adaptado para o ecossistema digital completo (Tiktok, LinkedIn, YouTube Shorts, WhatsApp).</p>
+             </div>
+             <div className="grid grid-cols-1 gap-8">
+                {plan.adaptations?.map((adapt, i) => (
+                  <div key={i} className="bg-slate-900 rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-xl">
+                    <div className="bg-slate-800/50 p-6 border-b border-slate-800 flex justify-between items-center">
+                      <p className="text-xl font-black text-white">"{adapt.originalTopic}"</p>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x border-slate-800">
+                      {/* TikTok */}
+                      <div className="p-8">
+                        <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-black font-black">T</div><h4 className="font-black text-white text-xs uppercase">TikTok</h4></div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase mb-2">Ideia Viral</p>
+                        <p className="text-sm font-bold text-slate-200 bg-slate-800 p-4 rounded-xl border border-slate-700 mb-4">{adapt.tiktok.videoIdea}</p>
+                        <div className="flex justify-between items-center mb-1"><label className="text-[10px] font-black text-slate-500 uppercase">Áudio Sugerido</label></div>
+                        <p className="text-[11px] text-green-400 font-bold mb-4">🎵 {adapt.tiktok.audioTrendSuggestion}</p>
+                        <div className="flex justify-between items-center mb-1"><label className="text-[10px] font-black text-slate-500 uppercase">Legenda</label><CopyButton text={adapt.tiktok.caption} /></div>
+                        <p className="text-xs text-slate-400 italic">{adapt.tiktok.caption}</p>
+                      </div>
+                      {/* LinkedIn */}
+                      <div className="p-8">
+                        <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black text-sm">In</div><h4 className="font-black text-white text-xs uppercase">LinkedIn</h4></div>
+                        <div className="flex justify-between items-center mb-1"><label className="text-[10px] font-black text-slate-500 uppercase">Post Profissional</label><CopyButton text={adapt.linkedin.postText} /></div>
+                        <p className="text-xs text-slate-200 leading-relaxed font-medium line-clamp-10">{adapt.linkedin.postText}</p>
+                        <div className="mt-4 text-blue-400 font-bold text-[10px]">{adapt.linkedin.hashtags.map(h => `#${h} `)}</div>
+                      </div>
+                      {/* YouTube Shorts */}
+                      <div className="p-8">
+                        <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white font-black text-xs">YT</div><h4 className="font-black text-white text-xs uppercase">YouTube Shorts</h4></div>
+                        <div className="flex justify-between items-center mb-1"><label className="text-[10px] font-black text-slate-500 uppercase">Título Otimizado</label><CopyButton text={adapt.youtubeShorts.title} /></div>
+                        <p className="text-sm font-bold text-slate-100 mb-4">{adapt.youtubeShorts.title}</p>
+                        <p className="text-[10px] font-black text-slate-500 uppercase mb-2">Ideia de Vídeo</p>
+                        <p className="text-xs text-slate-400 bg-slate-800 p-3 rounded-lg border border-slate-700 mb-4">{adapt.youtubeShorts.videoIdea}</p>
+                        <p className="text-[10px] font-black text-slate-500 uppercase mb-2">Descrição</p>
+                        <p className="text-[11px] text-slate-500 line-clamp-3 italic">"{adapt.youtubeShorts.description}"</p>
+                      </div>
+                      {/* WhatsApp */}
+                      <div className="p-8">
+                        <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-slate-950 font-black text-sm">W</div><h4 className="font-black text-white text-xs uppercase">WhatsApp</h4></div>
+                        <div className="flex justify-between items-center mb-1"><label className="text-[10px] font-black text-slate-500 uppercase">Mensagem Direta</label><CopyButton text={adapt.whatsapp.message} /></div>
+                        <p className="text-xs text-slate-300 italic bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/20 mb-4">"{adapt.whatsapp.message}"</p>
+                        <p className="text-[10px] font-black text-slate-500 uppercase mb-2">Ideia p/ Status</p>
+                        <p className="text-xs text-slate-400">{adapt.whatsapp.statusIdea}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {activeTab === 'conteudo' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-              <h2 className="text-2xl font-bold mb-6 text-slate-900">Estratégia do Mestre</h2>
-              <p className="text-slate-700 leading-relaxed text-lg italic">"{plan.strategy.rationale}"</p>
-            </div>
+                ))}
+             </div>
           </div>
         )}
 
         {activeTab === 'execucao' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-center mb-6">
+          <div className="animate-in fade-in duration-500">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">Seu Calendário Mensal</h2>
-                <p className="text-sm text-slate-500">Marque o que já foi postado para acompanhar seu progresso.</p>
+                <h2 className="text-3xl font-black text-white tracking-tighter uppercase">CONTENT CALENDAR</h2>
+                <p className="text-sm text-slate-500 font-bold uppercase tracking-widest mt-1">Multi-Plataforma: IG, TK, IN, YT</p>
               </div>
               <button 
                 onClick={onExtendCalendar}
                 disabled={isExtending}
-                className="bg-indigo-100 text-indigo-700 px-6 py-2 rounded-xl font-bold hover:bg-indigo-200 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="bg-slate-800 text-green-400 px-8 py-3 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-700 transition-all border border-slate-700 disabled:opacity-50 flex items-center gap-3"
               >
-                {isExtending ? 'Gerando...' : '+ Gerar Mais 10 Dias'}
+                {isExtending ? 'GERANDO...' : '+ Gerar Próximos 10 Dias'}
               </button>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
               {calendarDays.map((day) => {
                 const post = postsByDay[day];
                 return (
                   <div 
                     key={day}
-                    className={`min-h-[120px] p-3 rounded-2xl border transition-all ${
+                    className={`min-h-[140px] p-5 rounded-3xl border transition-all ${
                       post 
                         ? post.status === 'posted' 
-                          ? 'bg-emerald-50 border-emerald-100 opacity-60' 
-                          : 'bg-white border-slate-100 hover:border-indigo-400 cursor-pointer shadow-sm'
-                        : 'bg-slate-50 border-dashed border-slate-200 opacity-50'
-                    } relative`}
+                          ? 'bg-slate-800/40 border-slate-800 opacity-40 grayscale' 
+                          : 'bg-slate-900 border-slate-800 hover:border-green-500/50 cursor-pointer shadow-xl hover:-translate-y-1'
+                        : 'bg-slate-950 border-dashed border-slate-800 opacity-20'
+                    } relative flex flex-col group`}
                     onClick={() => post && setSelectedPost(post)}
                   >
-                    <span className="text-[10px] font-bold text-slate-400">DIA {day}</span>
+                    <span className="text-[10px] font-black text-slate-600 mb-3 tracking-widest">DIA {day}</span>
                     {post && (
-                      <div className="mt-1">
+                      <div className="flex-1 flex flex-col justify-between">
                         {post.isTrend && (
-                          <span className="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" title="Trend/Meme" />
+                          <div className="absolute top-4 right-4 flex h-2 w-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
                         )}
-                        <p className="text-[11px] font-bold text-slate-800 leading-tight line-clamp-3">{post.topic}</p>
-                        <div className="mt-2 flex items-center justify-between">
-                           <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                             post.platform === 'Instagram' ? 'bg-purple-100 text-purple-600' : 'bg-black text-white'
-                           }`}>
-                             {post.platform.charAt(0)}
-                           </span>
+                        <p className="text-[11px] font-black text-slate-100 leading-tight line-clamp-3 uppercase tracking-tighter">{post.topic}</p>
+                        <div className="mt-4 flex items-center justify-between">
+                           {getPlatformIcon(post.platform)}
                            {post.status === 'posted' && (
-                             <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                             <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                            )}
                         </div>
                       </div>
@@ -254,67 +230,123 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
         )}
+
+        {/* Brand/Strategy/Rivals remain with their previous styling */}
+        {activeTab === 'marca' && (
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-500">
+             <div className="bg-slate-900 p-10 rounded-[2.5rem] border border-slate-800">
+               <h3 className="font-black text-slate-500 uppercase text-[10px] tracking-widest mb-6">Bio & Posicionamento</h3>
+               <p className="text-2xl font-black text-white italic tracking-tighter mb-4">"{plan.identity.bio}"</p>
+               <p className="text-slate-400 text-sm leading-relaxed">{plan.identity.description}</p>
+             </div>
+             <div className="bg-gradient-to-br from-green-500 to-cyan-500 p-10 rounded-[2.5rem] text-slate-950">
+               <h3 className="font-black uppercase text-[10px] tracking-widest mb-4 opacity-70">Promessa Irresistível</h3>
+               <p className="text-4xl font-black tracking-tighter leading-tight">{plan.identity.promise}</p>
+             </div>
+           </div>
+        )}
+        
+        {activeTab === 'concorrencia' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in">
+            {plan.competitors.map((comp, i) => (
+              <div key={i} className="bg-slate-900 p-8 rounded-[2rem] border border-slate-800 hover:border-cyan-500 transition-all">
+                <h4 className="font-black text-white text-lg mb-2">{comp.name}</h4>
+                <div className="space-y-4">
+                  <div className="bg-slate-800 p-4 rounded-xl">
+                    <span className="text-[10px] font-black text-slate-500 uppercase">Atividade Recente</span>
+                    <p className="text-xs text-slate-200 mt-1 italic leading-relaxed">"{comp.recentActivity}"</p>
+                  </div>
+                  <div className="p-4 bg-cyan-500/10 rounded-xl border border-cyan-500/20">
+                     <span className="text-[10px] font-black text-cyan-400 uppercase">Oportunidade</span>
+                     <p className="text-xs text-cyan-100 font-bold mt-1">"{comp.opportunity}"</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'conteudo' && (
+          <div className="bg-slate-900 p-10 rounded-[2.5rem] border border-slate-800 animate-in slide-in-from-bottom-4">
+             <h2 className="text-3xl font-black text-white mb-10 tracking-tighter">DIRETRIZES ESTRATÉGICAS</h2>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+               <div className="p-6 bg-slate-800 rounded-3xl border border-slate-700">
+                 <h4 className="text-[10px] font-black text-green-400 uppercase mb-2">Frequência</h4>
+                 <p className="text-white font-bold">{plan.strategy.frequency}</p>
+               </div>
+               <div className="p-6 bg-slate-800 rounded-3xl border border-slate-700">
+                 <h4 className="text-[10px] font-black text-cyan-400 uppercase mb-2">Formatos</h4>
+                 <p className="text-white font-bold">{plan.strategy.formats.join(', ')}</p>
+               </div>
+               <div className="lg:col-span-2 p-10 bg-slate-950 rounded-3xl border border-slate-800 shadow-inner">
+                  <h4 className="text-[10px] font-black text-slate-500 uppercase mb-4">Racional da Agência</h4>
+                  <p className="text-slate-300 italic font-medium">"{plan.strategy.rationale}"</p>
+               </div>
+             </div>
+          </div>
+        )}
       </div>
 
-      {/* Selected Post Modal */}
+      {/* Detail Modal */}
       {selectedPost && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col scale-in duration-200">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white ${
-                    selectedPost.platform === 'Instagram' ? 'bg-gradient-to-tr from-yellow-400 to-purple-600' : 
-                    selectedPost.platform === 'TikTok' ? 'bg-black' : 'bg-green-500'
-                  }`}>
-                    {selectedPost.platform.charAt(0)}
-                  </div>
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 no-print animate-in fade-in duration-200">
+          <div className="bg-slate-900 w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden max-h-[95vh] flex flex-col border border-slate-800 scale-in duration-200">
+            <div className="p-8 border-b border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                  {getPlatformIcon(selectedPost.platform)}
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-slate-900">{selectedPost.type}</h4>
-                      {selectedPost.isTrend && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">TREND/MEME 🔥</span>}
-                    </div>
-                    <p className="text-xs font-medium text-slate-500">Dia {selectedPost.dayOfMonth} • {selectedPost.bestTime}</p>
+                    <h4 className="font-black text-white uppercase text-lg">{selectedPost.type}</h4>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Dia {selectedPost.dayOfMonth} • {selectedPost.bestTime}</p>
                   </div>
               </div>
-              <button onClick={() => setSelectedPost(null)} className="p-2 hover:bg-slate-100 rounded-full">
+              <button onClick={() => setSelectedPost(null)} className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-full">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-
-            <div className="p-8 overflow-y-auto space-y-8">
+            <div className="p-10 overflow-y-auto space-y-10">
               <section>
-                <label className="block text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-2">Tópico & Gancho</label>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">{selectedPost.topic}</h3>
-                <p className="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl text-indigo-900 font-medium italic">"{selectedPost.hook}"</p>
-              </section>
-
-              <section>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Legenda Sugerida</label>
-                  <CopyButton text={selectedPost.caption} />
+                <div className="flex justify-between items-start mb-3">
+                  <label className="block text-[10px] font-black text-green-400 uppercase tracking-widest">Tópico Central</label>
+                  {selectedPost.reelsMetadata?.audioTrend && (
+                    <span className="text-[10px] text-green-400 font-bold">🎵 Sugestão de Áudio: {selectedPost.reelsMetadata.audioTrend}</span>
+                  )}
                 </div>
-                <div className="p-6 bg-slate-50 rounded-2xl text-slate-700 whitespace-pre-line border border-slate-100 leading-relaxed">
-                  {selectedPost.caption}
-                  <div className="mt-4 text-indigo-600 font-medium">
-                    {selectedPost.hashtags.map(h => `#${h} `)}
+                <h3 className="text-2xl font-black text-white mb-4 leading-tight">{selectedPost.topic}</h3>
+                
+                {selectedPost.reelsMetadata && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div className="p-6 bg-green-500/5 border border-green-500/20 rounded-2xl">
+                      <label className="block text-[8px] font-black text-green-400 uppercase tracking-widest mb-2">Gancho (Primeiros 3s)</label>
+                      <p className="text-sm font-black text-white italic">"{selectedPost.reelsMetadata.hook3s}"</p>
+                    </div>
+                    <div className="p-6 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl">
+                      <label className="block text-[8px] font-black text-cyan-400 uppercase tracking-widest mb-2">CTA Otimizado</label>
+                      <p className="text-sm font-black text-white">"{selectedPost.reelsMetadata.cta}"</p>
+                    </div>
                   </div>
-                </div>
+                )}
+                
+                <div className="p-6 bg-slate-950 border border-slate-800 rounded-2xl italic font-bold text-slate-400 text-xs">Original Hook: "{selectedPost.hook}"</div>
               </section>
+              
+              <section>
+                <div className="flex justify-between items-center mb-4"><label className="text-[10px] font-black text-slate-500 uppercase">Legenda Sugerida</label><CopyButton text={selectedPost.caption} /></div>
+                <div className="p-8 bg-slate-800 rounded-3xl text-slate-100 whitespace-pre-line border border-slate-700 font-medium text-sm leading-relaxed">{selectedPost.caption}</div>
+                <div className="mt-4 text-cyan-400 font-black tracking-tighter">{selectedPost.hashtags.map(h => `#${h} `)}</div>
+              </section>
+              
+              {selectedPost.script && (
+                <section>
+                  <label className="text-[10px] font-black text-slate-500 uppercase block mb-4">Roteiro / Orientação Visual</label>
+                  <div className="p-6 bg-slate-950 border border-slate-800 rounded-2xl text-xs font-mono text-slate-400 leading-relaxed whitespace-pre-line">
+                    {selectedPost.script}
+                  </div>
+                </section>
+              )}
             </div>
-
-            <div className="p-6 bg-slate-50 border-t border-slate-100 shrink-0 flex gap-4">
-              <button 
-                onClick={() => {
-                  onTogglePostStatus(selectedPost.id);
-                  setSelectedPost(null);
-                }}
-                className={`flex-1 py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-2 ${
-                  selectedPost.status === 'posted' 
-                    ? 'bg-slate-200 text-slate-600 hover:bg-slate-300' 
-                    : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xl shadow-emerald-100'
-                }`}
-              >
-                {selectedPost.status === 'posted' ? 'Remarcar como Pendente' : 'Marcar como Postado ✓'}
+            <div className="p-8 bg-slate-950/50 border-t border-slate-800 flex gap-4">
+              <button onClick={() => { onTogglePostStatus(selectedPost.id); setSelectedPost(null); }} className={`flex-1 py-5 rounded-[2rem] font-black text-lg transition-all ${selectedPost.status === 'posted' ? 'bg-slate-800 text-slate-500' : 'bg-gradient-to-r from-green-500 to-cyan-500 text-slate-950 shadow-2xl shadow-green-500/10'}`}>
+                {selectedPost.status === 'posted' ? 'REMARCAR COMO PENDENTE' : 'MARCAR COMO PUBLICADO ✓'}
               </button>
             </div>
           </div>

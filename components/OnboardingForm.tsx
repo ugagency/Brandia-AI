@@ -14,6 +14,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
   const [profile, setProfile] = useState<BusinessProfile>({
     name: '',
     businessType: '',
+    productDescription: '',
     targetAudience: '',
     region: '',
     objective: 'vender',
@@ -51,152 +52,176 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
     onSubmit(profile);
   };
 
-  const inputClasses = "w-full p-4 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-0 outline-none transition-all text-lg";
-  const labelClasses = "block text-sm font-semibold text-slate-600 mb-2 uppercase tracking-wider";
+  const inputClasses = "w-full p-5 bg-slate-800 rounded-2xl border-2 border-slate-700 focus:border-green-500 focus:ring-0 outline-none transition-all text-white font-medium text-lg placeholder:text-slate-600";
+  const textareaClasses = "w-full p-5 bg-slate-800 rounded-2xl border-2 border-slate-700 focus:border-green-500 focus:ring-0 outline-none transition-all text-white font-medium text-lg min-h-[150px] placeholder:text-slate-600";
+  const labelClasses = "block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-[0.2em]";
+
+  const totalSteps = 5;
 
   return (
-    <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden p-8 md:p-12">
-      <div className="mb-10 text-center">
-        <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Diagnóstico Inteligente</h2>
-        <p className="text-slate-500">Responda as perguntas e deixe a IA cuidar do resto.</p>
-        <div className="mt-6 flex justify-center gap-2">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className={`h-2 w-12 rounded-full transition-all ${step >= i ? 'bg-indigo-600' : 'bg-slate-200'}`} />
+    <div className="max-w-xl mx-auto bg-slate-900 rounded-[3rem] shadow-2xl border border-slate-800 overflow-hidden p-10 md:p-14">
+      <div className="mb-12 text-center">
+        <h2 className="text-3xl font-black text-white mb-2 tracking-tighter uppercase">DIAGNOSTIC ENGINE</h2>
+        <p className="text-slate-500 font-medium">Deixe a IA mapear seu império digital.</p>
+        <div className="mt-8 flex justify-center gap-3">
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <div key={i} className={`h-1.5 w-10 rounded-full transition-all duration-500 ${step > i ? 'bg-green-500' : 'bg-slate-800'}`} />
           ))}
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
         {step === 1 && (
-          <div className="space-y-6 text-left">
+          <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
-              <label className={labelClasses}>Logo da sua Marca (Opcional)</label>
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-20 border-2 border-dashed border-slate-300 rounded-2xl flex items-center justify-center overflow-hidden bg-slate-50">
+              <label className={labelClasses}>Marca & Identidade Visual</label>
+              <div className="flex items-center gap-6 p-6 bg-slate-950 rounded-3xl border border-slate-800">
+                <div className="w-24 h-24 border-2 border-dashed border-slate-800 rounded-3xl flex items-center justify-center overflow-hidden bg-slate-900 relative group">
                   {profile.logoUrl ? (
                     <img src={profile.logoUrl} className="w-full h-full object-contain" alt="Logo preview" />
                   ) : (
-                    <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <svg className="w-10 h-10 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                   )}
+                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-input" />
+                  <label htmlFor="logo-input" className="absolute inset-0 cursor-pointer bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
+                    <span className="text-white text-[10px] font-black opacity-0 group-hover:opacity-100 uppercase tracking-widest">ALTERAR</span>
+                  </label>
                 </div>
                 <div className="flex-1">
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-input" />
-                  <label htmlFor="logo-input" className="cursor-pointer bg-slate-100 px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-200 transition-colors inline-block mb-1">
-                    Upload Logo
-                  </label>
-                  <p className="text-[10px] text-slate-400">A IA vai extrair as cores automaticamente.</p>
+                  <h4 className="text-white font-black uppercase text-xs tracking-tighter mb-1">Envie sua Logo</h4>
+                  <p className="text-[10px] text-slate-500 leading-snug">A IA extrairá automaticamente a paleta base de cores da imagem enviada.</p>
+                  {extractingColors && <p className="text-[10px] text-green-400 font-black mt-3 animate-pulse uppercase tracking-widest">Extraindo cores...</p>}
+                  {profile.manualColors && profile.manualColors.length > 0 && (
+                    <div className="mt-4 flex gap-2">
+                      {profile.manualColors.map((c, i) => (
+                        <div key={i} className="w-6 h-6 rounded-lg shadow-inner border border-slate-800" style={{ backgroundColor: c }} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-              {extractingColors && <p className="text-[10px] text-indigo-600 font-bold mt-2 animate-pulse">Extraindo cores da logo...</p>}
-              {profile.manualColors && profile.manualColors.length > 0 && (
-                <div className="mt-3 flex gap-2">
-                  {profile.manualColors.map((c, i) => (
-                    <div key={i} className="w-6 h-6 rounded-md shadow-sm border border-white" style={{ backgroundColor: c }} />
-                  ))}
-                </div>
-              )}
             </div>
             <div>
-              <label className={labelClasses}>Nome do seu Negócio</label>
+              <label className={labelClasses}>Nome do Negócio</label>
               <input 
                 required
                 type="text" 
-                placeholder="Ex: Barber Shop do João" 
+                placeholder="Ex: UG AI Agency" 
                 className={inputClasses}
                 value={profile.name}
                 onChange={e => setProfile({...profile, name: e.target.value})}
               />
             </div>
-            <button type="button" onClick={nextStep} className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
-              Próximo
+            <button type="button" onClick={nextStep} className="w-full bg-green-500 text-slate-950 py-5 rounded-[2rem] font-black text-lg hover:brightness-110 transition-all shadow-xl shadow-green-500/10">
+              PRÓXIMO PASSO
             </button>
           </div>
         )}
 
         {step === 2 && (
-          <div className="space-y-6 text-left">
+          <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
-              <label className={labelClasses}>O que você faz?</label>
+              <label className={labelClasses}>O que você vende / faz?</label>
               <input 
                 required
                 type="text" 
-                placeholder="Ex: Barbeiro, Manicure, Venda de Bolos" 
+                placeholder="Ex: Consultoria Tech, Estética, Delivery de Pizza" 
                 className={inputClasses}
                 value={profile.businessType}
                 onChange={e => setProfile({...profile, businessType: e.target.value})}
               />
             </div>
             <div>
-              <label className={labelClasses}>Para quem você vende?</label>
-              <input 
+              <label className={labelClasses}>Descrição do Produto/Serviço</label>
+              <textarea 
                 required
-                type="text" 
-                placeholder="Ex: Mulheres de 20-40 anos" 
-                className={inputClasses}
-                value={profile.targetAudience}
-                onChange={e => setProfile({...profile, targetAudience: e.target.value})}
+                placeholder="Descreva detalhes como diferenciais, preços (se quiser), o que torna seu produto único..." 
+                className={textareaClasses}
+                value={profile.productDescription}
+                onChange={e => setProfile({...profile, productDescription: e.target.value})}
               />
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 border-2 border-slate-200 py-4 rounded-xl font-bold text-slate-600">Voltar</button>
-              <button type="button" onClick={nextStep} className="flex-[2] bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200">Próximo</button>
+              <button type="button" onClick={prevStep} className="flex-1 bg-slate-800 border-2 border-slate-700 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={nextStep} className="flex-[2] bg-green-500 text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-green-500/10">CONTINUAR</button>
             </div>
           </div>
         )}
 
         {step === 3 && (
-          <div className="space-y-6 text-left">
+          <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
-              <label className={labelClasses}>Onde você atua?</label>
+              <label className={labelClasses}>Quem é seu Cliente Ideal?</label>
               <input 
                 required
                 type="text" 
-                placeholder="Ex: São Paulo, Bairro Itaim" 
+                placeholder="Ex: Empreendedores digitais, 25-45 anos, classe A" 
+                className={inputClasses}
+                value={profile.targetAudience}
+                onChange={e => setProfile({...profile, targetAudience: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className={labelClasses}>Região de Atuação</label>
+              <input 
+                required
+                type="text" 
+                placeholder="Ex: Brasil todo, São Paulo Capital, Portugal" 
                 className={inputClasses}
                 value={profile.region}
                 onChange={e => setProfile({...profile, region: e.target.value})}
               />
             </div>
-            <div>
-              <label className={labelClasses}>Objetivo Principal</label>
-              <select 
-                className={inputClasses}
-                value={profile.objective}
-                onChange={e => setProfile({...profile, objective: e.target.value as any})}
-              >
-                <option value="vender">Vender mais produtos/serviços</option>
-                <option value="atrair">Atrair novos seguidores/clientes</option>
-                <option value="autoridade">Ser visto como especialista</option>
-              </select>
-            </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 border-2 border-slate-200 py-4 rounded-xl font-bold text-slate-600">Voltar</button>
-              <button type="button" onClick={nextStep} className="flex-[2] bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200">Próximo</button>
+              <button type="button" onClick={prevStep} className="flex-1 bg-slate-800 border-2 border-slate-700 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={nextStep} className="flex-[2] bg-green-500 text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-green-500/10">CONTINUAR</button>
             </div>
           </div>
         )}
 
         {step === 4 && (
-          <div className="space-y-6 text-left">
+          <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
-              <label className={labelClasses}>Estilo da Marca</label>
+              <label className={labelClasses}>Foco do Marketing</label>
+              <select 
+                className={inputClasses}
+                value={profile.objective}
+                onChange={e => setProfile({...profile, objective: e.target.value as any})}
+              >
+                <option value="vender">Conversão em Vendas</option>
+                <option value="atrair">Growth / Novos Seguidores</option>
+                <option value="autoridade">Brand Authority / Especialista</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelClasses}>Tom de Voz / Estilo</label>
               <select 
                 className={inputClasses}
                 value={profile.style}
                 onChange={e => setProfile({...profile, style: e.target.value as any})}
               >
-                <option value="popular">Popular e Acessível</option>
-                <option value="descontraido">Descontraído e Moderno</option>
-                <option value="serio">Sério e Profissional</option>
+                <option value="popular">Popular & Direto</option>
+                <option value="descontraido">Moderno & Criativo</option>
+                <option value="serio">Premium & Profissional</option>
               </select>
             </div>
-            <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
-              <p className="text-indigo-900 text-sm font-medium">✨ Estamos quase lá! A IA vai analisar tudo isso e gerar seu plano viral agora.</p>
+            <div className="flex gap-4">
+              <button type="button" onClick={prevStep} className="flex-1 bg-slate-800 border-2 border-slate-700 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={nextStep} className="flex-[2] bg-green-500 text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-green-500/10">CONTINUAR</button>
+            </div>
+          </div>
+        )}
+
+        {step === 5 && (
+          <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
+            <div className="bg-slate-950 p-8 rounded-[2rem] border border-slate-800 text-center">
+              <p className="text-green-400 text-sm font-black uppercase tracking-widest mb-2">✨ TUDO PRONTO PARA O LANÇAMENTO.</p>
+              <p className="text-slate-500 text-xs">O diagnóstico será processado pelo nosso motor de IA Sênior.</p>
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 border-2 border-slate-200 py-4 rounded-xl font-bold text-slate-600">Voltar</button>
-              <button disabled={isLoading} type="submit" className="flex-[2] bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 disabled:opacity-50">
-                {isLoading ? 'Gerando Plano...' : 'Criar Meu Plano! 🚀'}
+              <button type="button" onClick={prevStep} className="flex-1 bg-slate-800 border-2 border-slate-700 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button disabled={isLoading} type="submit" className="flex-[2] bg-gradient-to-r from-green-500 to-cyan-500 text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-green-500/20 disabled:opacity-50">
+                {isLoading ? 'GERANDO...' : 'EXECUTAR PLANO 🚀'}
               </button>
             </div>
           </div>
