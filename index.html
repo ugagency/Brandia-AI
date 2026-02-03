@@ -4,14 +4,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Brandia AI - Sua marca pronta para crescer</title>
+    <title>STRATYX - Sua inteligência de mercado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'stratyx-green': '#39FF6A',
+              'stratyx-white': '#F5F7FA',
+              'stratyx-dark-start': '#484848',
+              'stratyx-dark-end': '#201F1F',
+            }
+          }
+        }
+      }
+    </script>
     <style>
       body { 
         font-family: 'Inter', sans-serif; 
-        background-color: #020617; /* slate-950 */
-        color: #f8fafc; /* slate-50 */
+        background: linear-gradient(135deg, #484848 0%, #201F1F 100%);
+        background-attachment: fixed;
+        color: #F5F7FA;
+        min-height: 100vh;
       }
       
       @media print {
@@ -23,20 +39,23 @@
         .print-only { display: block !important; }
         .page-break { page-break-before: always; }
         .avoid-break { page-break-inside: avoid; }
-        body { background-color: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .bg-slate-950, .bg-slate-900 { background-color: white !important; color: black !important; }
+        body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .bg-slate-950, .bg-slate-900, .bg-stratyx-dark-start { background-color: white !important; color: black !important; }
         .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
         .rounded-3xl { border-radius: 1rem !important; }
-        .text-green-400, .text-cyan-400 { color: #000 !important; }
-        .bg-indigo-600 { background-color: #4f46e5 !important; color: white !important; }
+        .text-stratyx-green, .text-green-400 { color: #000 !important; }
       }
       .print-only { display: none; }
 
       /* Neon scrollbar */
       ::-webkit-scrollbar { width: 8px; }
-      ::-webkit-scrollbar-track { background: #020617; }
-      ::-webkit-scrollbar-thumb { background: #22c55e; border-radius: 4px; }
-      ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+      ::-webkit-scrollbar-track { background: #201F1F; }
+      ::-webkit-scrollbar-thumb { background: #39FF6A; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #F5F7FA; }
+
+      .bg-main-gradient {
+        background: linear-gradient(135deg, #484848 0%, #201F1F 100%);
+      }
     </style>
   <script type="importmap">
 {
@@ -49,7 +68,7 @@
 }
 </script>
 </head>
-  <body class="bg-slate-950 text-slate-50 min-h-screen">
+  <body class="text-stratyx-white min-h-screen">
     <div id="root"></div>
   </body>
 </html>

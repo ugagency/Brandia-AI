@@ -2,13 +2,16 @@
 export interface BusinessProfile {
   name: string;
   businessType: string;
-  productDescription: string; // New field
+  productDescription: string;
   targetAudience: string;
   region: string;
   objective: 'vender' | 'atrair' | 'autoridade';
   style: 'serio' | 'descontraido' | 'popular';
-  logoUrl?: string; // Base64 logo
-  manualColors?: string[]; // Colors extracted or chosen
+  selectedPlatforms: Platform[]; // User choice
+  postsPerDay: number; // Frequency
+  selectedDaysOfWeek: string[]; // ['Segunda', 'Quarta', ...]
+  logoUrl?: string; 
+  manualColors?: string[]; 
 }
 
 export interface BrandIdentity {
@@ -31,9 +34,9 @@ export interface ContentStrategy {
 export type Platform = 'Instagram' | 'TikTok' | 'LinkedIn' | 'WhatsApp' | 'YouTube Shorts';
 
 export interface ReelsMetadata {
-  hook3s: string; // 3-second hook
-  cta: string; // Call to Action
-  audioTrend?: string; // Suggested audio trend
+  hook3s: string;
+  cta: string;
+  audioTrend?: string;
 }
 
 export interface PostItem {
@@ -90,6 +93,7 @@ export interface MarketingPlan {
   strategy: ContentStrategy;
   calendar: PostItem[];
   competitors: Competitor[];
+  summary: string; // New: Brief summary of why this works
   adaptations?: PlatformAdaptation[];
 }
 

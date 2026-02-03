@@ -31,7 +31,7 @@ export const extractColorsFromLogo = async (base64Image: string): Promise<string
     return JSON.parse(response.text);
   } catch (e) {
     console.error("Error parsing colors", e);
-    return ['#22c55e', '#06b6d4']; 
+    return ['#39FF6A', '#F5F7FA']; 
   }
 };
 
@@ -56,7 +56,7 @@ const POST_SCHEMA = {
     hashtags: { type: Type.ARRAY, items: { type: Type.STRING } },
     script: { type: Type.STRING },
     bestTime: { type: Type.STRING },
-    platform: { type: Type.STRING, description: "Must be 'Instagram', 'TikTok', 'LinkedIn' or 'YouTube Shorts'" },
+    platform: { type: Type.STRING },
     status: { type: Type.STRING, description: "Must be 'pending'" },
     isTrend: { type: Type.BOOLEAN },
     dayOfMonth: { type: Type.INTEGER },
@@ -69,20 +69,21 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
   const colorContext = profile.manualColors ? `Cores base: ${profile.manualColors.join(', ')}.` : '';
   
   const prompt = `
-    Aja como Diretor de Marketing Digital Sênior. Gere um plano completo e altamente detalhado para: ${profile.name}.
+    Aja como Diretor de Marketing Digital Sênior da STRATYX. Gere um plano completo e altamente detalhado para: ${profile.name}.
     TIPO DE NEGÓCIO: ${profile.businessType}.
-    DESCRIÇÃO DETALHADA DO PRODUTO/SERVIÇO: ${profile.productDescription}.
+    DESCRIÇÃO DETALHADA DO PRODUTO: ${profile.productDescription}.
     PÚBLICO-ALVO: ${profile.targetAudience} em ${profile.region}.
-    OBJETIVO PRINCIPAL: ${profile.objective}. 
-    ESTILO DE MARCA: ${profile.style}. 
-    ${colorContext}
+    OBJETIVO: ${profile.objective}. ESTILO: ${profile.style}. 
+    PLATAFORMAS SELECIONADAS: ${profile.selectedPlatforms.join(', ')}.
+    FREQUÊNCIA: ${profile.postsPerDay} post(s) por dia nos dias: ${profile.selectedDaysOfWeek.join(', ')}.
 
     REQUISITOS OBRIGATÓRIOS:
-    1. CALENDÁRIO MENSAL: Gere 20 posts variados distribuídos entre Instagram (Reels/Carrossel), TikTok, LinkedIn e YouTube Shorts.
-    2. GANCHOS E CTAS: Para vídeos curtos, use ganchos psicológicos de 3 segundos e CTAs focados no objetivo de ${profile.objective}.
-    3. TENDÊNCIAS: Pesquise tendências de 2025 via Google Search relevantes para o produto: ${profile.productDescription}.
-    4. ADAPTAÇÃO: Selecione os 3 melhores posts e adapte para TikTok, LinkedIn, YouTube Shorts e WhatsApp.
-    5. CONCORRÊNCIA: Liste 3 concorrentes REAIS em ${profile.region} e aponte como superá-los com base no produto descrito.
+    1. CALENDÁRIO MENSAL: Gere posts respeitando as plataformas selecionadas, os dias da semana e a frequência diária. Se um dia não estiver na lista de dias selecionados, não gere posts para ele.
+    2. GANCHOS E CTAS: Use ganchos de 3s e CTAs agressivos para conversão.
+    3. TENDÊNCIAS: Pesquise tendências de 2025 via Google Search para ${profile.businessType}.
+    4. RESUMO ESTRATÉGICO (summary): Escreva um parágrafo conciso explicando POR QUE esse estilo de post e essas plataformas serão eficazes para o público-alvo ${profile.targetAudience}, considerando o produto ${profile.name}.
+    5. ADAPTAÇÃO: Selecione os 3 melhores posts e adapte para as plataformas selecionadas.
+    6. CONCORRÊNCIA: Liste 3 rivais em ${profile.region}.
 
     IMPORTANT: Return EXACTLY a valid JSON object matching the requested schema. No conversational text.
   `;
@@ -119,6 +120,7 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
             },
             required: ["idealTypes", "frequency", "formats", "hotTopics", "rationale"]
           },
+          summary: { type: Type.STRING, description: "Strategic summary of the plan's effectiveness." },
           calendar: {
             type: Type.ARRAY,
             items: POST_SCHEMA
@@ -185,7 +187,7 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
             }
           }
         },
-        required: ["identity", "strategy", "calendar", "competitors", "adaptations"]
+        required: ["identity", "strategy", "summary", "calendar", "competitors", "adaptations"]
       }
     }
   });
@@ -206,10 +208,10 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
   const existingTopics = existingPosts.map(p => p.topic).slice(-10).join(', ');
 
   const prompt = `
-    Aja como Estrategista de Conteúdo Sênior. Gere mais 10 posts novos para ${profile.name} do dia ${lastDay + 1} em diante.
+    Aja como Estrategista de Conteúdo Sênior da STRATYX. Gere mais 10 posts novos para ${profile.name} do dia ${lastDay + 1} em diante.
+    Respeite as plataformas: ${profile.selectedPlatforms.join(', ')} e os dias selecionados: ${profile.selectedDaysOfWeek.join(', ')}.
     Contexto do produto: ${profile.productDescription}.
     NÃO REPITA ESTES TEMAS: ${existingTopics}.
-    Distribua entre Instagram, TikTok, LinkedIn e YouTube Shorts.
     Retorne apenas um array JSON de PostItem.
   `;
 

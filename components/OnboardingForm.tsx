@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { BusinessProfile } from '../types';
+import { BusinessProfile, Platform } from '../types';
 import { extractColorsFromLogo } from '../services/geminiService';
 
 interface OnboardingFormProps {
@@ -19,8 +19,14 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
     region: '',
     objective: 'vender',
     style: 'popular',
+    selectedPlatforms: ['Instagram', 'TikTok'],
+    postsPerDay: 1,
+    selectedDaysOfWeek: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
     manualColors: []
   });
+
+  const daysOfWeek = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+  const platforms: Platform[] = ['Instagram', 'TikTok', 'LinkedIn', 'YouTube Shorts', 'WhatsApp'];
 
   const nextStep = () => setStep(prev => prev + 1);
   const prevStep = () => setStep(prev => prev - 1);
@@ -47,25 +53,51 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
     reader.readAsDataURL(file);
   };
 
+  const togglePlatform = (p: Platform) => {
+    setProfile(prev => {
+      const exists = prev.selectedPlatforms.includes(p);
+      if (exists && prev.selectedPlatforms.length === 1) return prev; // Keep at least one
+      return {
+        ...prev,
+        selectedPlatforms: exists 
+          ? prev.selectedPlatforms.filter(item => item !== p) 
+          : [...prev.selectedPlatforms, p]
+      };
+    });
+  };
+
+  const toggleDay = (day: string) => {
+    setProfile(prev => {
+      const exists = prev.selectedDaysOfWeek.includes(day);
+      if (exists && prev.selectedDaysOfWeek.length === 1) return prev;
+      return {
+        ...prev,
+        selectedDaysOfWeek: exists 
+          ? prev.selectedDaysOfWeek.filter(item => item !== day) 
+          : [...prev.selectedDaysOfWeek, day]
+      };
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(profile);
   };
 
-  const inputClasses = "w-full p-5 bg-slate-800 rounded-2xl border-2 border-slate-700 focus:border-green-500 focus:ring-0 outline-none transition-all text-white font-medium text-lg placeholder:text-slate-600";
-  const textareaClasses = "w-full p-5 bg-slate-800 rounded-2xl border-2 border-slate-700 focus:border-green-500 focus:ring-0 outline-none transition-all text-white font-medium text-lg min-h-[150px] placeholder:text-slate-600";
+  const inputClasses = "w-full p-5 bg-black/40 rounded-2xl border-2 border-white/5 focus:border-stratyx-green focus:ring-0 outline-none transition-all text-stratyx-white font-medium text-lg placeholder:text-slate-600";
+  const textareaClasses = "w-full p-5 bg-black/40 rounded-2xl border-2 border-white/5 focus:border-stratyx-green focus:ring-0 outline-none transition-all text-stratyx-white font-medium text-lg min-h-[150px] placeholder:text-slate-600";
   const labelClasses = "block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-[0.2em]";
 
-  const totalSteps = 5;
+  const totalSteps = 6;
 
   return (
-    <div className="max-w-xl mx-auto bg-slate-900 rounded-[3rem] shadow-2xl border border-slate-800 overflow-hidden p-10 md:p-14">
+    <div className="max-w-xl mx-auto bg-black/20 backdrop-blur-xl rounded-[3rem] shadow-2xl border border-white/5 overflow-hidden p-10 md:p-14">
       <div className="mb-12 text-center">
-        <h2 className="text-3xl font-black text-white mb-2 tracking-tighter uppercase">DIAGNOSTIC ENGINE</h2>
-        <p className="text-slate-500 font-medium">Deixe a IA mapear seu império digital.</p>
+        <h2 className="text-3xl font-black text-stratyx-white mb-2 tracking-tighter uppercase">STRATEGIC SCAN</h2>
+        <p className="text-slate-500 font-medium">Configure seu motor de crescimento.</p>
         <div className="mt-8 flex justify-center gap-3">
           {Array.from({ length: totalSteps }).map((_, i) => (
-            <div key={i} className={`h-1.5 w-10 rounded-full transition-all duration-500 ${step > i ? 'bg-green-500' : 'bg-slate-800'}`} />
+            <div key={i} className={`h-1.5 w-10 rounded-full transition-all duration-500 ${step > i ? 'bg-stratyx-green' : 'bg-white/10'}`} />
           ))}
         </div>
       </div>
@@ -74,9 +106,9 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
         {step === 1 && (
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
-              <label className={labelClasses}>Marca & Identidade Visual</label>
-              <div className="flex items-center gap-6 p-6 bg-slate-950 rounded-3xl border border-slate-800">
-                <div className="w-24 h-24 border-2 border-dashed border-slate-800 rounded-3xl flex items-center justify-center overflow-hidden bg-slate-900 relative group">
+              <label className={labelClasses}>Identidade Visual</label>
+              <div className="flex items-center gap-6 p-6 bg-black/30 rounded-3xl border border-white/5">
+                <div className="w-24 h-24 border-2 border-dashed border-white/10 rounded-3xl flex items-center justify-center overflow-hidden bg-black relative group">
                   {profile.logoUrl ? (
                     <img src={profile.logoUrl} className="w-full h-full object-contain" alt="Logo preview" />
                   ) : (
@@ -84,66 +116,37 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
                   )}
                   <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-input" />
                   <label htmlFor="logo-input" className="absolute inset-0 cursor-pointer bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
-                    <span className="text-white text-[10px] font-black opacity-0 group-hover:opacity-100 uppercase tracking-widest">ALTERAR</span>
+                    <span className="text-white text-[10px] font-black opacity-0 group-hover:opacity-100 uppercase tracking-widest">UPLOAD</span>
                   </label>
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-white font-black uppercase text-xs tracking-tighter mb-1">Envie sua Logo</h4>
-                  <p className="text-[10px] text-slate-500 leading-snug">A IA extrairá automaticamente a paleta base de cores da imagem enviada.</p>
-                  {extractingColors && <p className="text-[10px] text-green-400 font-black mt-3 animate-pulse uppercase tracking-widest">Extraindo cores...</p>}
-                  {profile.manualColors && profile.manualColors.length > 0 && (
-                    <div className="mt-4 flex gap-2">
-                      {profile.manualColors.map((c, i) => (
-                        <div key={i} className="w-6 h-6 rounded-lg shadow-inner border border-slate-800" style={{ backgroundColor: c }} />
-                      ))}
-                    </div>
-                  )}
+                  <h4 className="text-stratyx-white font-black uppercase text-xs tracking-tighter mb-1">Logotipo</h4>
+                  <p className="text-[10px] text-slate-500 leading-snug">Extração automática de cores via IA.</p>
+                  {extractingColors && <p className="text-[10px] text-stratyx-green font-black mt-3 animate-pulse uppercase tracking-widest">Calibrando...</p>}
                 </div>
               </div>
             </div>
             <div>
-              <label className={labelClasses}>Nome do Negócio</label>
-              <input 
-                required
-                type="text" 
-                placeholder="Ex: UG AI Agency" 
-                className={inputClasses}
-                value={profile.name}
-                onChange={e => setProfile({...profile, name: e.target.value})}
-              />
+              <label className={labelClasses}>Nome da Marca</label>
+              <input required type="text" placeholder="Ex: Stratyx Corp" className={inputClasses} value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
             </div>
-            <button type="button" onClick={nextStep} className="w-full bg-green-500 text-slate-950 py-5 rounded-[2rem] font-black text-lg hover:brightness-110 transition-all shadow-xl shadow-green-500/10">
-              PRÓXIMO PASSO
-            </button>
+            <button type="button" onClick={nextStep} className="w-full bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black text-lg hover:brightness-110 shadow-xl shadow-stratyx-green/10 transition-all">PRÓXIMO</button>
           </div>
         )}
 
         {step === 2 && (
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
-              <label className={labelClasses}>O que você vende / faz?</label>
-              <input 
-                required
-                type="text" 
-                placeholder="Ex: Consultoria Tech, Estética, Delivery de Pizza" 
-                className={inputClasses}
-                value={profile.businessType}
-                onChange={e => setProfile({...profile, businessType: e.target.value})}
-              />
+              <label className={labelClasses}>Nicho & Mecânica</label>
+              <input required type="text" placeholder="Ex: Ecommerce de Moda, Consultoria Financeira" className={inputClasses} value={profile.businessType} onChange={e => setProfile({...profile, businessType: e.target.value})} />
             </div>
             <div>
-              <label className={labelClasses}>Descrição do Produto/Serviço</label>
-              <textarea 
-                required
-                placeholder="Descreva detalhes como diferenciais, preços (se quiser), o que torna seu produto único..." 
-                className={textareaClasses}
-                value={profile.productDescription}
-                onChange={e => setProfile({...profile, productDescription: e.target.value})}
-              />
+              <label className={labelClasses}>Descrição do Produto</label>
+              <textarea required placeholder="Quais os diferenciais e o que torna seu produto dominante?" className={textareaClasses} value={profile.productDescription} onChange={e => setProfile({...profile, productDescription: e.target.value})} />
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 bg-slate-800 border-2 border-slate-700 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
-              <button type="button" onClick={nextStep} className="flex-[2] bg-green-500 text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-green-500/10">CONTINUAR</button>
+              <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={nextStep} className="flex-[2] bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-stratyx-green/10">CONTINUAR</button>
             </div>
           </div>
         )}
@@ -151,30 +154,16 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
         {step === 3 && (
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
-              <label className={labelClasses}>Quem é seu Cliente Ideal?</label>
-              <input 
-                required
-                type="text" 
-                placeholder="Ex: Empreendedores digitais, 25-45 anos, classe A" 
-                className={inputClasses}
-                value={profile.targetAudience}
-                onChange={e => setProfile({...profile, targetAudience: e.target.value})}
-              />
+              <label className={labelClasses}>Alvo & Região</label>
+              <input required type="text" placeholder="Ex: Profissionais liberais, Brasil" className={inputClasses} value={profile.targetAudience} onChange={e => setProfile({...profile, targetAudience: e.target.value})} />
             </div>
             <div>
-              <label className={labelClasses}>Região de Atuação</label>
-              <input 
-                required
-                type="text" 
-                placeholder="Ex: Brasil todo, São Paulo Capital, Portugal" 
-                className={inputClasses}
-                value={profile.region}
-                onChange={e => setProfile({...profile, region: e.target.value})}
-              />
+              <label className={labelClasses}>Região Geográfica</label>
+              <input required type="text" placeholder="Ex: Nacional, São Paulo" className={inputClasses} value={profile.region} onChange={e => setProfile({...profile, region: e.target.value})} />
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 bg-slate-800 border-2 border-slate-700 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
-              <button type="button" onClick={nextStep} className="flex-[2] bg-green-500 text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-green-500/10">CONTINUAR</button>
+              <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={nextStep} className="flex-[2] bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-stratyx-green/10">CONTINUAR</button>
             </div>
           </div>
         )}
@@ -182,46 +171,89 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
         {step === 4 && (
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
-              <label className={labelClasses}>Foco do Marketing</label>
-              <select 
-                className={inputClasses}
-                value={profile.objective}
-                onChange={e => setProfile({...profile, objective: e.target.value as any})}
-              >
-                <option value="vender">Conversão em Vendas</option>
-                <option value="atrair">Growth / Novos Seguidores</option>
-                <option value="autoridade">Brand Authority / Especialista</option>
-              </select>
+              <label className={labelClasses}>Plataformas Desejadas</label>
+              <div className="flex flex-wrap gap-2">
+                {platforms.map(p => (
+                  <button 
+                    key={p} 
+                    type="button"
+                    onClick={() => togglePlatform(p)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border-2 ${profile.selectedPlatforms.includes(p) ? 'bg-stratyx-green text-slate-950 border-stratyx-green' : 'bg-black/20 text-slate-500 border-white/5'}`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
             </div>
             <div>
-              <label className={labelClasses}>Tom de Voz / Estilo</label>
-              <select 
-                className={inputClasses}
-                value={profile.style}
-                onChange={e => setProfile({...profile, style: e.target.value as any})}
-              >
-                <option value="popular">Popular & Direto</option>
-                <option value="descontraido">Moderno & Criativo</option>
-                <option value="serio">Premium & Profissional</option>
-              </select>
+              <label className={labelClasses}>Frequência Diária</label>
+              <div className="flex items-center gap-4">
+                <input 
+                  type="range" min="1" max="5" 
+                  className="flex-1 accent-stratyx-green" 
+                  value={profile.postsPerDay} 
+                  onChange={e => setProfile({...profile, postsPerDay: parseInt(e.target.value)})} 
+                />
+                <span className="text-xl font-black text-stratyx-green w-10 text-center">{profile.postsPerDay}</span>
+              </div>
+            </div>
+            <div>
+              <label className={labelClasses}>Dias da Semana</label>
+              <div className="flex flex-wrap gap-2">
+                {daysOfWeek.map(day => (
+                  <button 
+                    key={day} 
+                    type="button"
+                    onClick={() => toggleDay(day)}
+                    className={`px-3 py-2 rounded-xl text-[10px] font-bold transition-all border-2 ${profile.selectedDaysOfWeek.includes(day) ? 'bg-stratyx-green text-slate-950 border-stratyx-green' : 'bg-black/20 text-slate-500 border-white/5'}`}
+                  >
+                    {day.substring(0, 3)}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 bg-slate-800 border-2 border-slate-700 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
-              <button type="button" onClick={nextStep} className="flex-[2] bg-green-500 text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-green-500/10">CONTINUAR</button>
+              <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={nextStep} className="flex-[2] bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-stratyx-green/10">CONTINUAR</button>
             </div>
           </div>
         )}
 
         {step === 5 && (
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
-            <div className="bg-slate-950 p-8 rounded-[2rem] border border-slate-800 text-center">
-              <p className="text-green-400 text-sm font-black uppercase tracking-widest mb-2">✨ TUDO PRONTO PARA O LANÇAMENTO.</p>
-              <p className="text-slate-500 text-xs">O diagnóstico será processado pelo nosso motor de IA Sênior.</p>
+            <div>
+              <label className={labelClasses}>Objetivo de Escala</label>
+              <select className={inputClasses} value={profile.objective} onChange={e => setProfile({...profile, objective: e.target.value as any})}>
+                <option value="vender">Conversão Bruta</option>
+                <option value="atrair">Expansão de Audiência</option>
+                <option value="autoridade">Posicionamento de Autoridade</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelClasses}>Tom de Voz</label>
+              <select className={inputClasses} value={profile.style} onChange={e => setProfile({...profile, style: e.target.value as any})}>
+                <option value="popular">Impacto Direto</option>
+                <option value="descontraido">Criatividade Disruptiva</option>
+                <option value="serio">Executivo Premium</option>
+              </select>
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 bg-slate-800 border-2 border-slate-700 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
-              <button disabled={isLoading} type="submit" className="flex-[2] bg-gradient-to-r from-green-500 to-cyan-500 text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-green-500/20 disabled:opacity-50">
-                {isLoading ? 'GERANDO...' : 'EXECUTAR PLANO 🚀'}
+              <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={nextStep} className="flex-[2] bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-stratyx-green/10">CONTINUAR</button>
+            </div>
+          </div>
+        )}
+
+        {step === 6 && (
+          <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
+            <div className="bg-black/40 p-8 rounded-[2rem] border border-white/5 text-center">
+              <p className="text-stratyx-green text-sm font-black uppercase tracking-widest mb-2">⚡ PARÂMETROS CONFIGURADOS.</p>
+              <p className="text-slate-500 text-xs">O motor STRATYX irá sintetizar seu plano agora.</p>
+            </div>
+            <div className="flex gap-4">
+              <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button disabled={isLoading} type="submit" className="flex-[2] bg-gradient-to-r from-stratyx-green to-emerald-400 text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-stratyx-green/20 disabled:opacity-50">
+                {isLoading ? 'CALCULANDO...' : 'SINTETIZAR ESTRATÉGIA 🚀'}
               </button>
             </div>
           </div>
