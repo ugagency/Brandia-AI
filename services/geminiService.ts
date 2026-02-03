@@ -66,26 +66,34 @@ const POST_SCHEMA = {
 };
 
 export const generateMarketingPlan = async (profile: BusinessProfile): Promise<MarketingPlan> => {
-  const colorContext = profile.manualColors ? `Cores base: ${profile.manualColors.join(', ')}.` : '';
+  const momentContext = profile.businessMoment ? `MOMENTO ATUAL DA EMPRESA: ${profile.businessMoment}.` : '';
   
   const prompt = `
-    Aja como Diretor de Marketing Digital Sênior da STRATYX. Gere um plano completo e altamente detalhado para: ${profile.name}.
+    Aja como Diretor de Marketing Digital Sênior da STRATYX. Gere um plano de marketing ESTRATÉGICO para: ${profile.name}.
     TIPO DE NEGÓCIO: ${profile.businessType}.
-    DESCRIÇÃO DETALHADA DO PRODUTO: ${profile.productDescription}.
+    DESCRIÇÃO DO PRODUTO: ${profile.productDescription}.
+    ${momentContext}
     PÚBLICO-ALVO: ${profile.targetAudience} em ${profile.region}.
     OBJETIVO: ${profile.objective}. ESTILO: ${profile.style}. 
-    PLATAFORMAS SELECIONADAS: ${profile.selectedPlatforms.join(', ')}.
-    FREQUÊNCIA: ${profile.postsPerDay} post(s) por dia nos dias: ${profile.selectedDaysOfWeek.join(', ')}.
+    
+    REQUISITOS DE AGENDAMENTO (OBRIGATÓRIOS E MATEMÁTICOS):
+    - PLATAFORMAS SELECIONADAS: ${profile.selectedPlatforms.join(', ')}.
+    - FREQUÊNCIA: ${profile.postsPerDay} post(s) POR DIA para CADA plataforma selecionada individualmente.
+    - DIAS DA SEMANA ATIVOS: ${profile.selectedDaysOfWeek.join(', ')}.
+    
+    INSTRUÇÃO DE GERAÇÃO PARA SEMANA 1 (Dias 1 a 7):
+    Para CADA dia da semana (de 1 a 7) que corresponder a um dos dias ativos em [${profile.selectedDaysOfWeek.join(', ')}], você DEVE gerar EXATAMENTE ${profile.postsPerDay} posts para CADA uma das plataformas em [${profile.selectedPlatforms.join(', ')}].
+    
+    Exemplo Crítico: Se o usuário selecionou 3 plataformas e 2 posts/dia, e o dia está ativo, o JSON deve conter exatamente 6 posts para aquele dia específico (2 para cada rede).
+    
+    NÃO pule nenhum dia ativo. NÃO ignore nenhuma das plataformas escolhidas.
+    
+    OUTROS REQUISITOS:
+    1. RESUMO ESTRATÉGICO (summary): Justifique por que este plano (estilo de posts, tom e escolha de redes) é a melhor abordagem técnica considerando o momento da empresa e o público-alvo.
+    2. CONCORRÊNCIA: Liste 3 rivais locais/digitais reais.
+    3. ADAPTAÇÕES: Crie o Hub de Adaptação para as redes selecionadas.
 
-    REQUISITOS OBRIGATÓRIOS:
-    1. CALENDÁRIO MENSAL: Gere posts respeitando as plataformas selecionadas, os dias da semana e a frequência diária. Se um dia não estiver na lista de dias selecionados, não gere posts para ele.
-    2. GANCHOS E CTAS: Use ganchos de 3s e CTAs agressivos para conversão.
-    3. TENDÊNCIAS: Pesquise tendências de 2025 via Google Search para ${profile.businessType}.
-    4. RESUMO ESTRATÉGICO (summary): Escreva um parágrafo conciso explicando POR QUE esse estilo de post e essas plataformas serão eficazes para o público-alvo ${profile.targetAudience}, considerando o produto ${profile.name}.
-    5. ADAPTAÇÃO: Selecione os 3 melhores posts e adapte para as plataformas selecionadas.
-    6. CONCORRÊNCIA: Liste 3 rivais em ${profile.region}.
-
-    IMPORTANT: Return EXACTLY a valid JSON object matching the requested schema. No conversational text.
+    Retorne APENAS o JSON.
   `;
 
   const response = await ai.models.generateContent({
@@ -120,7 +128,7 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
             },
             required: ["idealTypes", "frequency", "formats", "hotTopics", "rationale"]
           },
-          summary: { type: Type.STRING, description: "Strategic summary of the plan's effectiveness." },
+          summary: { type: Type.STRING },
           calendar: {
             type: Type.ARRAY,
             items: POST_SCHEMA
@@ -193,13 +201,11 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
   });
 
   const text = response.text;
-  if (!text) throw new Error("Empty response from AI");
-  
   try {
     return JSON.parse(text);
   } catch (err) {
-    console.error("JSON Parse Error. Raw response:", text);
-    throw new Error("Falha ao processar os dados da IA. O formato retornado é inválido.");
+    console.error("JSON Parse Error", text);
+    throw new Error("Ocorreu um erro na estruturação dos dados. Tente novamente.");
   }
 };
 
@@ -208,11 +214,12 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
   const existingTopics = existingPosts.map(p => p.topic).slice(-10).join(', ');
 
   const prompt = `
-    Aja como Estrategista de Conteúdo Sênior da STRATYX. Gere mais 10 posts novos para ${profile.name} do dia ${lastDay + 1} em diante.
-    Respeite as plataformas: ${profile.selectedPlatforms.join(', ')} e os dias selecionados: ${profile.selectedDaysOfWeek.join(', ')}.
-    Contexto do produto: ${profile.productDescription}.
-    NÃO REPITA ESTES TEMAS: ${existingTopics}.
-    Retorne apenas um array JSON de PostItem.
+    Aja como Estrategista de Conteúdo Sênior da STRATYX. Gere MAIS 7 dias de posts novos (Próxima Semana).
+    - PLATAFORMAS: ${profile.selectedPlatforms.join(', ')}.
+    - FREQUÊNCIA: ${profile.postsPerDay} post(s) POR DIA para CADA plataforma.
+    - DIAS DA SEMANA ATIVOS: ${profile.selectedDaysOfWeek.join(', ')}.
+    Comece do dia ${lastDay + 1}. Gere exatamente a quantidade solicitada baseada na frequência e dias ativos para cada rede.
+    Retorne apenas o array JSON de PostItem.
   `;
 
   const response = await ai.models.generateContent({
@@ -228,7 +235,5 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
     }
   });
 
-  const text = response.text;
-  if (!text) throw new Error("Empty response from AI extension");
-  return JSON.parse(text);
+  return JSON.parse(response.text);
 };

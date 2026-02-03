@@ -127,7 +127,7 @@ const App: React.FC = () => {
       }
     } catch (error) {
       console.error("Error extending calendar:", error);
-      alert("Houve um erro ao gerar mais posts.");
+      alert("Erro ao estender o plano.");
     } finally {
       setIsExtending(false);
     }
@@ -151,7 +151,7 @@ const App: React.FC = () => {
       setCurrentProjectId(null);
     } catch (error) {
       console.error("Error generating plan:", error);
-      alert("Erro ao gerar plano. Tente novamente.");
+      alert("Falha crítica no motor de IA. Verifique as configurações e tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -196,9 +196,8 @@ const App: React.FC = () => {
               />
             </div>
             <button className="w-full bg-stratyx-green text-slate-950 py-4 rounded-2xl font-black text-lg hover:brightness-110 transition-all shadow-lg shadow-stratyx-green/10">
-              ACESSAR STRATYX
+              CONECTAR AO HUB
             </button>
-            <p className="text-center text-[10px] text-slate-600 uppercase font-bold tracking-widest">Plataforma de Alta Performance</p>
           </form>
         </div>
       </div>
@@ -214,84 +213,50 @@ const App: React.FC = () => {
         </div>
         <div className="flex items-center gap-4">
           {!isStarted && !isLoading && projects.length > 0 && (
-            <button 
-              onClick={() => setShowProjects(!showProjects)}
-              className="text-xs font-bold text-slate-400 uppercase hover:text-stratyx-green transition-colors"
-            >
+            <button onClick={() => setShowProjects(!showProjects)} className="text-xs font-bold text-slate-400 uppercase hover:text-stratyx-green transition-colors">
               {showProjects ? 'Início' : `Projetos (${projects.length})`}
             </button>
           )}
           <div className="h-4 w-[1px] bg-white/10 mx-2" />
-          <div className="flex items-center gap-3">
-             <span className="text-[10px] font-bold text-slate-500 uppercase hidden md:inline">{user.email}</span>
-             <button onClick={handleLogout} className="text-slate-500 hover:text-red-400">
-               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-             </button>
-          </div>
+          <button onClick={handleLogout} className="text-slate-500 hover:text-red-400">SAIR</button>
         </div>
       </nav>
 
       <main className="pt-8 pb-24">
         {!isStarted && !isLoading && !showProjects && (
           <div className="px-4 text-center max-w-4xl mx-auto no-print">
-            <h1 className="text-5xl md:text-7xl font-black text-stratyx-white tracking-tighter leading-[1] mb-6">
-              Domine seu mercado com <span className="bg-clip-text text-transparent bg-gradient-to-r from-stratyx-green to-cyan-400">ESTRATÉGIA</span>.
+            <h1 className="text-5xl md:text-7xl font-black text-stratyx-white tracking-tighter leading-[1] mb-6 animate-in slide-in-from-top-10 duration-700">
+              Arquitetura de conteúdo com <span className="bg-clip-text text-transparent bg-gradient-to-r from-stratyx-green to-cyan-400">PODER</span>.
             </h1>
-            <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-              O motor de IA que transforma seu produto em uma marca dominante.
+            <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed opacity-0 animate-in fade-in duration-1000 fill-mode-forwards">
+              Sintonize seu produto com o algoritmo. Gere planos semanais precisos com STRATYX AI.
             </p>
             <OnboardingForm onSubmit={handleOnboardingSubmit} isLoading={isLoading} />
-            
-            <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-              {[
-                { title: 'Stratyx Engine', desc: 'Identidade inspirada em precisão matemática e visão de futuro.', color: 'text-stratyx-green' },
-                { title: 'Omnichannel Real', desc: 'Sua marca em todas as redes com consistência cirúrgica.', color: 'text-cyan-400' },
-                { title: 'Insight Grounding', desc: 'Dados reais do mercado integrados ao seu plano de conteúdo.', color: 'text-stratyx-green' }
-              ].map((feature, i) => (
-                <div key={i} className="bg-black/20 p-8 rounded-[2rem] border border-white/5 hover:border-white/10 transition-all">
-                  <h3 className={`text-xl font-bold mb-2 ${feature.color}`}>{feature.title}</h3>
-                  <p className="text-slate-500 leading-relaxed text-sm">{feature.desc}</p>
-                </div>
-              ))}
-            </div>
           </div>
         )}
 
         {showProjects && !isStarted && !isLoading && (
           <div className="max-w-4xl mx-auto px-4 no-print animate-in fade-in duration-500">
-            <h2 className="text-4xl font-black text-stratyx-white mb-8 tracking-tighter uppercase">Projetos Ativos</h2>
+            <h2 className="text-4xl font-black text-stratyx-white mb-8 tracking-tighter uppercase">MEUS PROJETOS</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {projects.map(proj => (
-                <div 
-                  key={proj.id} 
-                  onClick={() => loadProject(proj)}
-                  className="bg-black/20 p-8 rounded-[2.5rem] border border-white/5 hover:border-stratyx-green/50 cursor-pointer transition-all group relative overflow-hidden"
-                >
-                  <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={(e) => deleteProject(proj.id, e)} className="p-2 bg-slate-800 text-slate-400 hover:text-red-400 rounded-full">
+                <div key={proj.id} onClick={() => loadProject(proj)} className="bg-black/20 p-8 rounded-[2.5rem] border border-white/5 hover:border-stratyx-green/50 cursor-pointer transition-all group overflow-hidden">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-2xl font-black border border-white/5 overflow-hidden">
+                      {proj.profile.logoUrl ? <img src={proj.profile.logoUrl} className="w-full h-full object-contain" /> : proj.projectName.charAt(0)}
+                    </div>
+                    <button onClick={(e) => deleteProject(proj.id, e)} className="p-2 text-slate-600 hover:text-red-400">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                   </div>
-                  <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-2xl font-black mb-6 border border-white/5 overflow-hidden">
-                    {proj.profile.logoUrl ? <img src={proj.profile.logoUrl} className="w-full h-full object-contain" /> : proj.projectName.charAt(0)}
-                  </div>
                   <h3 className="text-2xl font-black text-stratyx-white mb-1 group-hover:text-stratyx-green transition-colors">{proj.projectName}</h3>
-                  <p className="text-slate-500 text-sm mb-6">{proj.profile.businessType}</p>
+                  <p className="text-slate-500 text-sm mb-6 uppercase tracking-widest">{proj.profile.businessType}</p>
                   <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-600 border-t border-white/5 pt-4">
                     <span>{proj.plan.calendar.length} POSTS</span>
-                    <span className="text-stratyx-green">CARREGAR ESTRATÉGIA →</span>
+                    <span className="text-stratyx-green">CARREGAR HUB →</span>
                   </div>
                 </div>
               ))}
-              <div 
-                onClick={handleNewPlan}
-                className="bg-black/5 border-2 border-dashed border-white/10 rounded-[2.5rem] flex flex-col items-center justify-center p-8 hover:border-stratyx-green/50 transition-all group cursor-pointer"
-              >
-                <div className="w-12 h-12 rounded-full border-2 border-white/10 flex items-center justify-center mb-4 group-hover:bg-stratyx-green group-hover:text-slate-950 group-hover:border-stratyx-green transition-all">
-                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                </div>
-                <span className="font-bold text-slate-600 group-hover:text-stratyx-green">Novo Projeto</span>
-              </div>
             </div>
           </div>
         )}
@@ -299,8 +264,8 @@ const App: React.FC = () => {
         {isLoading && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 no-print">
             <div className="w-20 h-20 border-4 border-stratyx-green border-t-transparent rounded-full animate-spin mb-8 shadow-lg shadow-stratyx-green/20" />
-            <h2 className="text-3xl font-black text-stratyx-white mb-4 animate-pulse uppercase tracking-tighter">STRATYX AI PROCESSANDO...</h2>
-            <p className="text-slate-500 max-w-md">Calculando vetores de mercado, ganchos psicológicos e identidades de alto impacto.</p>
+            <h2 className="text-3xl font-black text-stratyx-white mb-4 animate-pulse uppercase tracking-tighter">SINTETIZANDO SEMANA 01...</h2>
+            <p className="text-slate-500 max-w-md">Cruzando ganchos de retenção com padrões de consumo do seu alvo.</p>
           </div>
         )}
 

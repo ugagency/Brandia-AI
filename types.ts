@@ -3,13 +3,14 @@ export interface BusinessProfile {
   name: string;
   businessType: string;
   productDescription: string;
+  businessMoment?: string; // New field: current stage of the business
   targetAudience: string;
   region: string;
   objective: 'vender' | 'atrair' | 'autoridade';
   style: 'serio' | 'descontraido' | 'popular';
-  selectedPlatforms: Platform[]; // User choice
-  postsPerDay: number; // Frequency
-  selectedDaysOfWeek: string[]; // ['Segunda', 'Quarta', ...]
+  selectedPlatforms: Platform[]; 
+  postsPerDay: number; 
+  selectedDaysOfWeek: string[]; 
   logoUrl?: string; 
   manualColors?: string[]; 
 }
@@ -93,7 +94,7 @@ export interface MarketingPlan {
   strategy: ContentStrategy;
   calendar: PostItem[];
   competitors: Competitor[];
-  summary: string; // New: Brief summary of why this works
+  summary: string; 
   adaptations?: PlatformAdaptation[];
 }
 
