@@ -95,6 +95,7 @@ export interface MarketingPlan {
   competitors: Competitor[];
   summary: string; // New: Brief summary of why this works
   adaptations?: PlatformAdaptation[];
+  groundingSources?: any[]; // For Google Search transparency compliance
 }
 
 export interface Project {

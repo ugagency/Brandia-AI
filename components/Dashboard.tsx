@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { MarketingPlan, BusinessProfile, PostItem, Competitor, PlatformAdaptation, Platform, Project } from '../types';
 import { storageService } from '../services/storageService';
+import { LogoComponent } from '../constants';
 
 interface DashboardProps {
   plan: MarketingPlan;
@@ -75,21 +76,44 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="max-w-6xl mx-auto px-4 pb-20">
-      {/* Strategy Efficiency Summary */}
+      {/* Strategy Efficiency Summary & Grounding Sources */}
       <div className="mb-8 p-8 bg-stratyx-green/10 border border-stratyx-green/20 rounded-[2.5rem] animate-in fade-in duration-700 avoid-break">
         <h3 className="text-stratyx-green text-xs font-black uppercase tracking-widest mb-3 flex items-center gap-2">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
           SÍNTESE DA EFICIÊNCIA ESTRATÉGICA
         </h3>
-        <p className="text-stratyx-white text-lg font-medium leading-relaxed italic">
+        <p className="text-stratyx-white text-lg font-medium leading-relaxed italic mb-6">
           "{plan.summary}"
         </p>
+
+        {/* Displaying Google Search grounding Sources to satisfy API requirements */}
+        {plan.groundingSources && plan.groundingSources.length > 0 && (
+          <div className="pt-6 border-t border-stratyx-green/10">
+            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Fontes de Pesquisa (Google)</h4>
+            <div className="flex flex-wrap gap-2">
+              {plan.groundingSources.map((chunk, idx) => (
+                chunk.web && (
+                  <a 
+                    key={idx} 
+                    href={chunk.web.uri} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 bg-black/40 border border-white/5 px-3 py-1.5 rounded-xl text-[10px] text-stratyx-green font-bold hover:bg-stratyx-green/10 transition-colors"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    {chunk.web.title || 'Referência Externa'}
+                  </a>
+                )
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Header */}
       <div className="bg-black/20 backdrop-blur-md rounded-[2.5rem] p-8 mb-8 flex flex-col md:flex-row items-center gap-8 shadow-2xl border border-white/5 avoid-break">
         <div className="w-24 h-24 bg-slate-900 rounded-3xl flex items-center justify-center text-stratyx-green text-4xl font-black overflow-hidden shadow-inner border border-white/5">
-          {profile.logoUrl ? <img src={profile.logoUrl} className="w-full h-full object-contain" /> : profile.name.charAt(0)}
+          {profile.logoUrl ? <img src={profile.logoUrl} className="w-full h-full object-contain" /> : <LogoComponent className="h-10" />}
         </div>
         <div className="text-center md:text-left flex-1">
           {isRenaming ? (

@@ -2,22 +2,26 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { BusinessProfile, MarketingPlan, PostItem } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Always use process.env.API_KEY directly and use named parameter for apiKey
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const extractColorsFromLogo = async (base64Image: string): Promise<string[]> => {
+  // Use proper contents structure with parts for multi-modal requests
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: [
-      {
-        inlineData: {
-          mimeType: 'image/png',
-          data: base64Image.split(',')[1] || base64Image,
+    contents: {
+      parts: [
+        {
+          inlineData: {
+            mimeType: 'image/png',
+            data: base64Image.split(',')[1] || base64Image,
+          },
         },
-      },
-      {
-        text: "Analyze this logo and identify the primary and secondary brand colors. Return ONLY an array of hex color codes in JSON format like this: ['#HEX1', '#HEX2']. Do not include any other text.",
-      }
-    ],
+        {
+          text: "Analyze this logo and identify the primary and secondary brand colors. Return ONLY an array of hex color codes in JSON format like this: ['#HEX1', '#HEX2']. Do not include any other text.",
+        }
+      ]
+    },
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -28,7 +32,8 @@ export const extractColorsFromLogo = async (base64Image: string): Promise<string
   });
 
   try {
-    return JSON.parse(response.text);
+    // response.text is a property, not a method
+    return JSON.parse(response.text || '[]');
   } catch (e) {
     console.error("Error parsing colors", e);
     return ['#39FF6A', '#F5F7FA']; 
@@ -66,8 +71,6 @@ const POST_SCHEMA = {
 };
 
 export const generateMarketingPlan = async (profile: BusinessProfile): Promise<MarketingPlan> => {
-  const colorContext = profile.manualColors ? `Cores base: ${profile.manualColors.join(', ')}.` : '';
-  
   const prompt = `
     Aja como Diretor de Marketing Digital Sênior da STRATYX. Gere um plano completo e altamente detalhado para: ${profile.name}.
     TIPO DE NEGÓCIO: ${profile.businessType}.
@@ -195,8 +198,12 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
   const text = response.text;
   if (!text) throw new Error("Empty response from AI");
   
+  // Extract grounding chunks for compliance with Search transparency requirements
+  const groundingSources = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+
   try {
-    return JSON.parse(text);
+    const plan = JSON.parse(text);
+    return { ...plan, groundingSources };
   } catch (err) {
     console.error("JSON Parse Error. Raw response:", text);
     throw new Error("Falha ao processar os dados da IA. O formato retornado é inválido.");

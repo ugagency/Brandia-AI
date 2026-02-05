@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import { BusinessProfile, MarketingPlan, Project } from './types';
 import { generateMarketingPlan, extendCalendar } from './services/geminiService';
 import { storageService } from './services/storageService';
+import { LogoComponent } from './constants';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<{ email: string } | null>(null);
@@ -159,9 +160,8 @@ const App: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center p-6 bg-main-gradient">
         <div className="w-full max-w-md bg-black/30 backdrop-blur-xl border border-white/10 p-10 rounded-[2.5rem] shadow-2xl">
           <div className="flex flex-col items-center mb-10">
-            <div className="bg-stratyx-green w-16 h-16 rounded-2xl flex items-center justify-center font-black text-3xl italic text-slate-950 shadow-lg shadow-stratyx-green/20 mb-6">S</div>
-            <h1 className="text-4xl font-black tracking-tighter text-stratyx-white">STRATYX<span className="text-stratyx-green">AI</span></h1>
-            <p className="text-slate-400 mt-2">Sua inteligência, sua estratégia.</p>
+            <LogoComponent className="h-16 mb-6" />
+            <p className="text-slate-400 mt-2 font-medium">Sua inteligência, sua estratégia.</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
@@ -189,8 +189,7 @@ const App: React.FC = () => {
     <div className="min-h-screen transition-colors duration-500">
       <nav className="p-6 flex justify-between items-center max-w-6xl mx-auto no-print">
         <div className="flex items-center gap-3 cursor-pointer" onClick={handleNewPlan}>
-          <div className="bg-stratyx-green text-slate-950 w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl italic shadow-lg shadow-stratyx-green/20">S</div>
-          <span className="text-2xl font-black tracking-tighter text-stratyx-white">STRATYX<span className="text-stratyx-green">AI</span></span>
+          <LogoComponent className="h-8" />
         </div>
         <div className="flex items-center gap-4">
           {!isStarted && !isLoading && projects.length > 0 && (
@@ -233,7 +232,7 @@ const App: React.FC = () => {
                     </button>
                   </div>
                   <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-2xl font-black mb-6 border border-white/5 overflow-hidden">
-                    {proj.profile.logoUrl ? <img src={proj.profile.logoUrl} className="w-full h-full object-contain" /> : proj.projectName.charAt(0)}
+                    {proj.profile.logoUrl ? <img src={proj.profile.logoUrl} className="w-full h-full object-contain" /> : <LogoComponent className="h-6" />}
                   </div>
                   <h3 className="text-2xl font-black text-stratyx-white mb-1 group-hover:text-stratyx-green transition-colors">{proj.projectName}</h3>
                   <p className="text-slate-500 text-sm mb-6">{proj.profile.businessType}</p>
