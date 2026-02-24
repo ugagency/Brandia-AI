@@ -1,40 +1,61 @@
 
 import { Project } from "../types";
+import { supabase } from "./supabase";
 
 /**
- * Este serviço simula uma API de banco de dados.
- * Para conectar um "banco real", você substituiria as chamadas de localStorage
- * por fetch() ou chamadas ao SDK do Supabase/Firebase.
+ * Este serviço agora utiliza o banco de dados real do Supabase.
  */
-
 export const storageService = {
   async saveProject(email: string, project: Project): Promise<void> {
-    const key = `stratyx_projects_v1_${email}`;
-    const projects = await this.getProjects(email);
-    const index = projects.findIndex(p => p.id === project.id);
-    
-    if (index > -1) {
-      projects[index] = project;
-    } else {
-      projects.unshift(project);
+    const { error } = await supabase
+      .from('projects')
+      .upsert({
+        id: project.id, // Se o ID for UUID ou string única
+        user_email: email,
+        project_name: project.projectName,
+        profile: project.profile,
+        plan: project.plan,
+        created_at: project.createdAt
+      });
+
+    if (error) {
+      console.error("Erro ao salvar projeto no Supabase:", error);
+      throw error;
     }
-    
-    localStorage.setItem(key, JSON.stringify(projects));
-    return Promise.resolve();
   },
 
   async getProjects(email: string): Promise<Project[]> {
-    const key = `stratyx_projects_v1_${email}`;
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : [];
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('user_email', email)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Erro ao buscar projetos no Supabase:", error);
+      return [];
+    }
+
+    return (data || []).map(item => ({
+      id: item.id,
+      projectName: item.project_name,
+      profile: item.profile,
+      plan: item.plan,
+      createdAt: item.created_at
+    }));
   },
 
   async deleteProject(email: string, projectId: string): Promise<void> {
-    const key = `stratyx_projects_v1_${email}`;
-    const projects = await this.getProjects(email);
-    const updated = projects.filter(p => p.id !== projectId);
-    localStorage.setItem(key, JSON.stringify(updated));
-    return Promise.resolve();
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', projectId)
+      .eq('user_email', email);
+
+    if (error) {
+      console.error("Erro ao excluir projeto no Supabase:", error);
+      throw error;
+    }
   },
 
   exportPlanAsJSON(project: Project) {

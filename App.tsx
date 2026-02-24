@@ -3,13 +3,17 @@ import React, { useState, useEffect } from 'react';
 import OnboardingForm from './components/OnboardingForm';
 import Dashboard from './components/Dashboard';
 import { BusinessProfile, MarketingPlan, Project } from './types';
+
 import { generateMarketingPlan, extendCalendar } from './services/geminiService';
 import { storageService } from './services/storageService';
 import { LogoComponent } from './constants';
+import { supabase } from './services/supabase';
 
 const App: React.FC = () => {
+  console.log("App component mounting...");
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [isStarted, setIsStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -19,14 +23,31 @@ const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showProjects, setShowProjects] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [authMessage, setAuthMessage] = useState('');
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('stratyx_current_user');
-    if (savedUser) {
-      const u = JSON.parse(savedUser);
-      setUser(u);
-      loadUserProjects(u.email);
-    }
+    // 1. Verificar sessão atual
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const u = session?.user;
+      if (u && u.email) {
+        setUser({ email: u.email });
+        loadUserProjects(u.email);
+      }
+    });
+
+    // 2. Escutar mudanças na autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const u = session?.user;
+      if (u && u.email) {
+        setUser({ email: u.email });
+        loadUserProjects(u.email);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const loadUserProjects = async (email: string) => {
@@ -34,28 +55,56 @@ const App: React.FC = () => {
     setProjects(userProjects);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginEmail) return;
-    const u = { email: loginEmail };
-    setUser(u);
-    localStorage.setItem('stratyx_current_user', JSON.stringify(u));
-    loadUserProjects(loginEmail);
+    if (!loginEmail || !loginPassword) return;
+
+    setAuthMessage(authMode === 'login' ? 'Autenticando...' : 'Criando conta...');
+
+    let result;
+    if (authMode === 'signup') {
+      result = await supabase.auth.signUp({
+        email: loginEmail,
+        password: loginPassword,
+        options: {
+          emailRedirectTo: window.location.origin
+        }
+      });
+    } else {
+      result = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
+      });
+    }
+
+    const { error } = (result as any);
+
+    if (error) {
+      setAuthMessage(`Erro: ${error.message}`);
+      console.error("Auth error:", error);
+    } else {
+      if (authMode === 'signup' && (result as any).data.user && !(result as any).data.session) {
+        setAuthMessage('Conta criada! Verifique seu e-mail para confirmar.');
+      } else {
+        setAuthMessage('');
+      }
+    }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     setIsStarted(false);
     setMarketingPlan(null);
     setProfile(null);
     setShowProjects(false);
     setCurrentProjectId(null);
-    localStorage.removeItem('stratyx_current_user');
+    setAuthMessage('');
   };
 
   const saveProject = async (projectName: string) => {
     if (!profile || !marketingPlan || !user) return;
-    
+
     setIsSaving(true);
     const updatedProfile = { ...profile, name: projectName };
     setProfile(updatedProfile);
@@ -77,13 +126,13 @@ const App: React.FC = () => {
 
   const handleTogglePostStatus = async (postId: string) => {
     if (!marketingPlan || !user || !currentProjectId) return;
-    
-    const updatedCalendar = marketingPlan.calendar.map(post => 
+
+    const updatedCalendar = marketingPlan.calendar.map(post =>
       post.id === postId ? { ...post, status: (post.status === 'posted' ? 'pending' : 'posted') as any } : post
     );
     const newPlan = { ...marketingPlan, calendar: updatedCalendar };
     setMarketingPlan(newPlan);
-    
+
     const currentProject = projects.find(p => p.id === currentProjectId);
     if (currentProject) {
       const updatedProject = { ...currentProject, plan: newPlan };
@@ -100,7 +149,7 @@ const App: React.FC = () => {
       const updatedCalendar = [...marketingPlan.calendar, ...newPosts];
       const newPlan = { ...marketingPlan, calendar: updatedCalendar };
       setMarketingPlan(newPlan);
-      
+
       if (currentProjectId) {
         const currentProject = projects.find(p => p.id === currentProjectId);
         if (currentProject) {
@@ -161,23 +210,60 @@ const App: React.FC = () => {
         <div className="w-full max-w-md bg-black/30 backdrop-blur-xl border border-white/10 p-10 rounded-[2.5rem] shadow-2xl">
           <div className="flex flex-col items-center mb-10">
             <LogoComponent className="h-16 mb-6" />
-            <p className="text-slate-400 mt-2 font-medium">Sua inteligência, sua estratégia.</p>
+            <h2 className="text-2xl font-black text-stratyx-white uppercase tracking-tighter">
+              {authMode === 'login' ? 'Bem-vindo de volta' : 'Crie sua conta'}
+            </h2>
+            <p className="text-slate-400 mt-2 font-medium">
+              {authMode === 'login' ? 'Sua inteligência, sua estratégia.' : 'Comece sua jornada estratégica.'}
+            </p>
           </div>
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">E-mail de Acesso</label>
-              <input 
-                type="email" 
-                required 
+              <input
+                type="email"
+                required
                 placeholder="nome@exemplo.com"
                 className="w-full bg-slate-800/50 border-2 border-slate-700 p-4 rounded-2xl outline-none focus:border-stratyx-green transition-all text-stratyx-white"
                 value={loginEmail}
                 onChange={e => setLoginEmail(e.target.value)}
               />
             </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Senha</label>
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                className="w-full bg-slate-800/50 border-2 border-slate-700 p-4 rounded-2xl outline-none focus:border-stratyx-green transition-all text-stratyx-white"
+                value={loginPassword}
+                onChange={e => setLoginPassword(e.target.value)}
+              />
+            </div>
+
             <button className="w-full bg-stratyx-green text-slate-950 py-4 rounded-2xl font-black text-lg hover:brightness-110 transition-all shadow-lg shadow-stratyx-green/10">
-              ACESSAR PLATAFORMA
+              {authMode === 'login' ? 'ACESSAR PLATAFORMA' : 'CRIAR CONTA AGORA'}
             </button>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode(authMode === 'login' ? 'signup' : 'login');
+                  setAuthMessage('');
+                }}
+                className="text-xs font-bold text-slate-500 hover:text-stratyx-green uppercase tracking-widest transition-colors"
+              >
+                {authMode === 'login' ? 'Não tem uma conta? Clique aqui' : 'Já tem uma conta? Faça login'}
+              </button>
+            </div>
+
+            {authMessage && (
+              <p className="text-center text-xs font-bold text-stratyx-green animate-pulse uppercase tracking-wider">
+                {authMessage}
+              </p>
+            )}
             <p className="text-center text-[10px] text-slate-600 uppercase font-bold tracking-widest">Login Seguro STRATYX</p>
           </form>
         </div>
@@ -199,10 +285,10 @@ const App: React.FC = () => {
           )}
           <div className="h-4 w-[1px] bg-white/10 mx-2" />
           <div className="flex items-center gap-3">
-             <span className="text-[10px] font-bold text-slate-500 uppercase hidden md:inline">{user.email}</span>
-             <button onClick={handleLogout} className="text-slate-500 hover:text-red-400">
-               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-             </button>
+            <span className="text-[10px] font-bold text-slate-500 uppercase hidden md:inline">{user.email}</span>
+            <button onClick={handleLogout} className="text-slate-500 hover:text-red-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </button>
           </div>
         </div>
       </nav>
@@ -244,7 +330,7 @@ const App: React.FC = () => {
               ))}
               <div onClick={handleNewPlan} className="bg-black/5 border-2 border-dashed border-white/10 rounded-[2.5rem] flex flex-col items-center justify-center p-8 hover:border-stratyx-green/50 transition-all group cursor-pointer">
                 <div className="w-12 h-12 rounded-full border-2 border-white/10 flex items-center justify-center mb-4 group-hover:bg-stratyx-green group-hover:text-slate-950 group-hover:border-stratyx-green transition-all">
-                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
                 </div>
                 <span className="font-bold text-slate-600 group-hover:text-stratyx-green">Novo Plano de Marketing</span>
               </div>
@@ -261,10 +347,10 @@ const App: React.FC = () => {
         )}
 
         {isStarted && marketingPlan && profile && (
-          <Dashboard 
-            plan={marketingPlan} 
-            profile={profile} 
-            onExportPDF={() => window.print()} 
+          <Dashboard
+            plan={marketingPlan}
+            profile={profile}
+            onExportPDF={() => window.print()}
             onSaveProject={saveProject}
             onTogglePostStatus={handleTogglePostStatus}
             onExtendCalendar={handleExtendCalendar}

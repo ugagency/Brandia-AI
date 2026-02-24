@@ -15,12 +15,12 @@ interface DashboardProps {
   isExtending?: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ 
-  plan, 
-  profile, 
-  onExportPDF, 
-  onSaveProject, 
-  onTogglePostStatus, 
+const Dashboard: React.FC<DashboardProps> = ({
+  plan,
+  profile,
+  onExportPDF,
+  onSaveProject,
+  onTogglePostStatus,
   onExtendCalendar,
   isSaving,
   isExtending
@@ -47,7 +47,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   };
 
   const CopyButton = ({ text }: { text: string }) => (
-    <button 
+    <button
       onClick={() => navigator.clipboard.writeText(text)}
       className="text-[10px] bg-slate-800 hover:bg-slate-700 text-stratyx-white px-2 py-1 rounded font-bold transition-colors no-print border border-slate-700"
     >
@@ -64,7 +64,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const calendarDays = Array.from({ length: 30 }, (_, i) => i + 1);
 
   const getPlatformIcon = (platform: Platform) => {
-    switch(platform) {
+    switch (platform) {
       case 'Instagram': return <span className="text-[10px] bg-gradient-to-tr from-yellow-400 to-purple-600 px-2 py-0.5 rounded text-white font-bold">IG</span>;
       case 'TikTok': return <span className="text-[10px] bg-white text-black px-2 py-0.5 rounded font-bold">TK</span>;
       case 'LinkedIn': return <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded font-bold">IN</span>;
@@ -93,10 +93,10 @@ const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex flex-wrap gap-2">
               {plan.groundingSources.map((chunk, idx) => (
                 chunk.web && (
-                  <a 
-                    key={idx} 
-                    href={chunk.web.uri} 
-                    target="_blank" 
+                  <a
+                    key={idx}
+                    href={chunk.web.uri}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 bg-black/40 border border-white/5 px-3 py-1.5 rounded-xl text-[10px] text-stratyx-green font-bold hover:bg-stratyx-green/10 transition-colors"
                   >
@@ -118,8 +118,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         <div className="text-center md:text-left flex-1">
           {isRenaming ? (
             <div className="flex items-center gap-2 justify-center md:justify-start">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 className="text-3xl font-black text-stratyx-white border-b-2 border-stratyx-green outline-none bg-transparent max-w-xs"
                 value={tempProjectName}
                 onChange={e => setTempProjectName(e.target.value)}
@@ -143,17 +143,17 @@ const Dashboard: React.FC<DashboardProps> = ({
             <p className="text-stratyx-green font-black uppercase tracking-widest text-[10px]">{isSaving ? 'Salvando...' : 'Nuvem Ativa'}</p>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap items-center justify-center gap-4 no-print">
-           <button onClick={handleJSONExport} className="bg-slate-800/50 text-slate-400 p-3 rounded-2xl hover:bg-slate-800 transition-all border border-white/5" title="Exportar JSON">
-             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-           </button>
-           <button onClick={onExportPDF} className="bg-slate-800 text-stratyx-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-slate-700 transition-all border border-white/10">
-             PDF
-           </button>
-           <button onClick={handleSave} disabled={isSaving} className="bg-stratyx-green text-slate-950 px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:brightness-110 shadow-lg shadow-stratyx-green/10">
-             {isSaving ? 'SALVANDO...' : 'SALVAR PLANO'}
-           </button>
+          <button onClick={handleJSONExport} className="bg-slate-800/50 text-slate-400 p-3 rounded-2xl hover:bg-slate-800 transition-all border border-white/5" title="Exportar JSON">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+          </button>
+          <button onClick={onExportPDF} className="bg-slate-800 text-stratyx-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-slate-700 transition-all border border-white/10">
+            PDF
+          </button>
+          <button onClick={handleSave} disabled={isSaving} className="bg-stratyx-green text-slate-950 px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:brightness-110 shadow-lg shadow-stratyx-green/10">
+            {isSaving ? 'SALVANDO...' : 'SALVAR PLANO'}
+          </button>
         </div>
       </div>
 
@@ -163,9 +163,8 @@ const Dashboard: React.FC<DashboardProps> = ({
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`whitespace-nowrap flex-1 py-4 px-6 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${
-              activeTab === tab ? 'bg-stratyx-green text-slate-950 shadow-lg shadow-stratyx-green/10' : 'text-slate-400 hover:text-stratyx-white'
-            }`}
+            className={`whitespace-nowrap flex-1 py-4 px-6 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${activeTab === tab ? 'bg-stratyx-green text-slate-950 shadow-lg shadow-stratyx-green/10' : 'text-slate-400 hover:text-stratyx-white'
+              }`}
           >
             {tab === 'marca' ? 'Marca' : tab === 'conteudo' ? 'Estratégia' : tab === 'concorrencia' ? 'Rivais' : tab === 'canais' ? 'Omnichannel' : 'Calendário'}
           </button>
@@ -176,55 +175,55 @@ const Dashboard: React.FC<DashboardProps> = ({
         {/* Canais */}
         {(activeTab === 'canais' || window.matchMedia('print').matches) && (
           <div className="space-y-8 animate-in fade-in duration-500 page-break">
-             <div className="bg-black/10 border border-white/5 p-10 rounded-[2.5rem]">
-                <h2 className="text-3xl font-black text-stratyx-white mb-2 tracking-tighter">ADAPTAÇÕES MULTIPLATAFORMA</h2>
-                <p className="text-slate-400">Distribuição estratégica baseada no público e canais selecionados.</p>
-             </div>
-             <div className="grid grid-cols-1 gap-8">
-                {plan.adaptations?.map((adapt, i) => (
-                  <div key={i} className="bg-black/10 rounded-[2.5rem] border border-white/5 overflow-hidden shadow-xl avoid-break">
-                    <div className="bg-white/5 p-6 border-b border-white/5">
-                      <p className="text-xl font-black text-stratyx-white italic">"{adapt.originalTopic}"</p>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x border-white/5">
-                      {/* TikTok */}
-                      {profile.selectedPlatforms.includes('TikTok') && (
-                        <div className="p-8">
-                          <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-black font-black">T</div><h4 className="font-black text-stratyx-white text-xs uppercase">TikTok</h4></div>
-                          <p className="text-[10px] font-black text-slate-500 uppercase mb-2">Conceito Visual</p>
-                          <p className="text-sm font-bold text-slate-200 bg-black/20 p-4 rounded-xl border border-white/5 mb-4">{adapt.tiktok.videoIdea}</p>
-                          <p className="text-[11px] text-stratyx-green font-bold mb-4">🎵 {adapt.tiktok.audioTrendSuggestion}</p>
-                          <CopyButton text={adapt.tiktok.caption} />
-                        </div>
-                      )}
-                      {/* LinkedIn */}
-                      {profile.selectedPlatforms.includes('LinkedIn') && (
-                        <div className="p-8">
-                          <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black text-sm">In</div><h4 className="font-black text-stratyx-white text-xs uppercase">LinkedIn</h4></div>
-                          <div className="mb-2"><CopyButton text={adapt.linkedin.postText} /></div>
-                          <p className="text-xs text-slate-200 leading-relaxed font-medium line-clamp-10 italic">{adapt.linkedin.postText}</p>
-                        </div>
-                      )}
-                      {/* YouTube */}
-                      {profile.selectedPlatforms.includes('YouTube Shorts') && (
-                        <div className="p-8">
-                          <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white font-black text-xs">YT</div><h4 className="font-black text-stratyx-white text-xs uppercase">Shorts</h4></div>
-                          <p className="text-sm font-bold text-slate-100 mb-4">{adapt.youtubeShorts.title}</p>
-                          <p className="text-xs text-slate-400 bg-black/20 p-3 rounded-lg border border-white/5">{adapt.youtubeShorts.videoIdea}</p>
-                        </div>
-                      )}
-                      {/* WhatsApp */}
-                      {profile.selectedPlatforms.includes('WhatsApp') && (
-                        <div className="p-8">
-                          <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-slate-950 font-black text-sm">W</div><h4 className="font-black text-stratyx-white text-xs uppercase">Zap</h4></div>
-                          <div className="mb-2"><CopyButton text={adapt.whatsapp.message} /></div>
-                          <p className="text-xs text-slate-300 italic bg-stratyx-green/5 p-4 rounded-xl border border-stratyx-green/10">"{adapt.whatsapp.message}"</p>
-                        </div>
-                      )}
-                    </div>
+            <div className="bg-black/10 border border-white/5 p-10 rounded-[2.5rem]">
+              <h2 className="text-3xl font-black text-stratyx-white mb-2 tracking-tighter">ADAPTAÇÕES MULTIPLATAFORMA</h2>
+              <p className="text-slate-400">Distribuição estratégica baseada no público e canais selecionados.</p>
+            </div>
+            <div className="grid grid-cols-1 gap-8">
+              {plan.adaptations?.map((adapt, i) => (
+                <div key={i} className="bg-black/10 rounded-[2.5rem] border border-white/5 overflow-hidden shadow-xl avoid-break">
+                  <div className="bg-white/5 p-6 border-b border-white/5">
+                    <p className="text-xl font-black text-stratyx-white italic">"{adapt.originalTopic}"</p>
                   </div>
-                ))}
-             </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x border-white/5">
+                    {/* TikTok */}
+                    {profile.selectedPlatforms.includes('TikTok') && (
+                      <div className="p-8">
+                        <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-black font-black">T</div><h4 className="font-black text-stratyx-white text-xs uppercase">TikTok</h4></div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase mb-2">Conceito Visual</p>
+                        <p className="text-sm font-bold text-slate-200 bg-black/20 p-4 rounded-xl border border-white/5 mb-4">{adapt.tiktok.videoIdea}</p>
+                        <p className="text-[11px] text-stratyx-green font-bold mb-4">🎵 {adapt.tiktok.audioTrendSuggestion}</p>
+                        <CopyButton text={adapt.tiktok.caption} />
+                      </div>
+                    )}
+                    {/* LinkedIn */}
+                    {profile.selectedPlatforms.includes('LinkedIn') && (
+                      <div className="p-8">
+                        <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black text-sm">In</div><h4 className="font-black text-stratyx-white text-xs uppercase">LinkedIn</h4></div>
+                        <div className="mb-2"><CopyButton text={adapt.linkedin.postText} /></div>
+                        <p className="text-xs text-slate-200 leading-relaxed font-medium line-clamp-10 italic">{adapt.linkedin.postText}</p>
+                      </div>
+                    )}
+                    {/* YouTube */}
+                    {profile.selectedPlatforms.includes('YouTube Shorts') && (
+                      <div className="p-8">
+                        <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white font-black text-xs">YT</div><h4 className="font-black text-stratyx-white text-xs uppercase">Shorts</h4></div>
+                        <p className="text-sm font-bold text-slate-100 mb-4">{adapt.youtubeShorts.title}</p>
+                        <p className="text-xs text-slate-400 bg-black/20 p-3 rounded-lg border border-white/5">{adapt.youtubeShorts.videoIdea}</p>
+                      </div>
+                    )}
+                    {/* WhatsApp */}
+                    {profile.selectedPlatforms.includes('WhatsApp') && (
+                      <div className="p-8">
+                        <div className="flex items-center gap-3 mb-6"><div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-slate-950 font-black text-sm">W</div><h4 className="font-black text-stratyx-white text-xs uppercase">Zap</h4></div>
+                        <div className="mb-2"><CopyButton text={adapt.whatsapp.message} /></div>
+                        <p className="text-xs text-slate-300 italic bg-stratyx-green/5 p-4 rounded-xl border border-stratyx-green/10">"{adapt.whatsapp.message}"</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -264,17 +263,17 @@ const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Marca */}
         {activeTab === 'marca' && (
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-500">
-             <div className="bg-black/20 p-10 rounded-[2.5rem] border border-white/5">
-               <h3 className="font-black text-slate-500 uppercase text-[10px] tracking-widest mb-6">Identidade de Bio</h3>
-               <p className="text-2xl font-black text-stratyx-white italic tracking-tighter mb-4 leading-tight">"{plan.identity.bio}"</p>
-               <p className="text-slate-400 text-sm leading-relaxed">{plan.identity.description}</p>
-             </div>
-             <div className="bg-gradient-to-br from-stratyx-green to-emerald-400 p-10 rounded-[2.5rem] text-slate-950">
-               <h3 className="font-black uppercase text-[10px] tracking-widest mb-4 opacity-70">A Grande Promessa</h3>
-               <p className="text-4xl font-black tracking-tighter leading-tight">{plan.identity.promise}</p>
-             </div>
-           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-500">
+            <div className="bg-black/20 p-10 rounded-[2.5rem] border border-white/5">
+              <h3 className="font-black text-slate-500 uppercase text-[10px] tracking-widest mb-6">Identidade de Bio</h3>
+              <p className="text-2xl font-black text-stratyx-white italic tracking-tighter mb-4 leading-tight">"{plan.identity.bio}"</p>
+              <p className="text-slate-400 text-sm leading-relaxed">{plan.identity.description}</p>
+            </div>
+            <div className="bg-gradient-to-br from-stratyx-green to-emerald-400 p-10 rounded-[2.5rem] text-slate-950">
+              <h3 className="font-black uppercase text-[10px] tracking-widest mb-4 opacity-70">A Grande Promessa</h3>
+              <p className="text-4xl font-black tracking-tighter leading-tight">{plan.identity.promise}</p>
+            </div>
+          </div>
         )}
       </div>
 
@@ -284,8 +283,8 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div className="bg-slate-900 w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden max-h-[95vh] flex flex-col border border-white/10">
             <div className="p-8 border-b border-white/5 flex justify-between items-center">
               <div className="flex items-center gap-4">
-                  {getPlatformIcon(selectedPost.platform)}
-                  <h4 className="font-black text-stratyx-white uppercase text-lg">Detalhes do Post</h4>
+                {getPlatformIcon(selectedPost.platform)}
+                <h4 className="font-black text-stratyx-white uppercase text-lg">Detalhes do Post</h4>
               </div>
               <button onClick={() => setSelectedPost(null)} className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-full transition-colors">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>

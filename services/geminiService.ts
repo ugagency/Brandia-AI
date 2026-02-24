@@ -2,14 +2,25 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { BusinessProfile, MarketingPlan, PostItem } from "../types";
 
-// Always use process.env.API_KEY directly and use named parameter for apiKey
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Função auxiliar para inicialização lazy do SDK
+let aiInstance: GoogleGenAI | null = null;
+const getAI = () => {
+  const apiKey = import.meta.env.VITE_API_KEY || "";
+  if (!apiKey) {
+    throw new Error("VITE_API_KEY_MISSING: Por favor, configure a variável VITE_API_KEY no arquivo .env");
+  }
+  if (!aiInstance) {
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+};
 
 export const extractColorsFromLogo = async (base64Image: string): Promise<string[]> => {
+  const ai = getAI();
   // Use proper contents structure with parts for multi-modal requests
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: {
+    model: 'gemini-1.5-flash',
+    contents: [{
       parts: [
         {
           inlineData: {
@@ -21,7 +32,7 @@ export const extractColorsFromLogo = async (base64Image: string): Promise<string
           text: "Analyze this logo and identify the primary and secondary brand colors. Return ONLY an array of hex color codes in JSON format like this: ['#HEX1', '#HEX2']. Do not include any other text.",
         }
       ]
-    },
+    }],
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -32,11 +43,10 @@ export const extractColorsFromLogo = async (base64Image: string): Promise<string
   });
 
   try {
-    // response.text is a property, not a method
     return JSON.parse(response.text || '[]');
   } catch (e) {
     console.error("Error parsing colors", e);
-    return ['#39FF6A', '#F5F7FA']; 
+    return ['#39FF6A', '#F5F7FA'];
   }
 };
 
@@ -91,9 +101,10 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
     IMPORTANT: Return EXACTLY a valid JSON object matching the requested schema. No conversational text.
   `;
 
+  const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview',
-    contents: prompt,
+    model: 'gemini-1.5-pro',
+    contents: [{ parts: [{ text: prompt }] }],
     config: {
       tools: [{ googleSearch: {} }],
       responseMimeType: "application/json",
@@ -197,7 +208,7 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
 
   const text = response.text;
   if (!text) throw new Error("Empty response from AI");
-  
+
   // Extract grounding chunks for compliance with Search transparency requirements
   const groundingSources = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
 
@@ -222,9 +233,10 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
     Retorne apenas um array JSON de PostItem.
   `;
 
+  const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: prompt,
+    model: 'gemini-1.5-flash',
+    contents: [{ parts: [{ text: prompt }] }],
     config: {
       tools: [{ googleSearch: {} }],
       responseMimeType: "application/json",
