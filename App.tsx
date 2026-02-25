@@ -180,9 +180,9 @@ const App: React.FC = () => {
       setMarketingPlan(plan);
       setIsStarted(true);
       setCurrentProjectId(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating plan:", error);
-      alert("Erro ao gerar plano. Verifique sua conexão.");
+      alert(`Erro: ${error.message || "Verifique sua conexão e tente novamente."}`);
     } finally {
       setIsLoading(false);
     }

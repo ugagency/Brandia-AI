@@ -3,11 +3,11 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { BusinessProfile, MarketingPlan, PostItem } from "../types";
 
 // Função auxiliar para inicialização lazy do SDK
-let aiInstance: GoogleGenAI | null = null;
+let aiInstance: any = null;
 const getAI = () => {
-  const apiKey = import.meta.env.VITE_API_KEY || "";
+  const apiKey = process.env.GEMINI_API_KEY || "";
   if (!apiKey) {
-    throw new Error("VITE_API_KEY_MISSING: Por favor, configure a variável VITE_API_KEY no arquivo .env");
+    throw new Error("GEMINI_API_KEY_MISSING: Verifique se a variável está no .env.");
   }
   if (!aiInstance) {
     aiInstance = new GoogleGenAI({ apiKey });
@@ -17,9 +17,8 @@ const getAI = () => {
 
 export const extractColorsFromLogo = async (base64Image: string): Promise<string[]> => {
   const ai = getAI();
-  // Use proper contents structure with parts for multi-modal requests
   const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-flash-latest',
     contents: [{
       parts: [
         {
@@ -81,6 +80,7 @@ const POST_SCHEMA = {
 };
 
 export const generateMarketingPlan = async (profile: BusinessProfile): Promise<MarketingPlan> => {
+  console.log("🚀 Iniciando generateMarketingPlan no Gemini...");
   const prompt = `
     Aja como Diretor de Marketing Digital Sênior da STRATYX. Gere um plano completo e altamente detalhado para: ${profile.name}.
     TIPO DE NEGÓCIO: ${profile.businessType}.
@@ -103,10 +103,9 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
 
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-1.5-pro',
+    model: 'gemini-flash-latest',
     contents: [{ parts: [{ text: prompt }] }],
     config: {
-      tools: [{ googleSearch: {} }],
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -209,12 +208,8 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
   const text = response.text;
   if (!text) throw new Error("Empty response from AI");
 
-  // Extract grounding chunks for compliance with Search transparency requirements
-  const groundingSources = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
-
   try {
-    const plan = JSON.parse(text);
-    return { ...plan, groundingSources };
+    return JSON.parse(text);
   } catch (err) {
     console.error("JSON Parse Error. Raw response:", text);
     throw new Error("Falha ao processar os dados da IA. O formato retornado é inválido.");
@@ -235,10 +230,9 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
 
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-flash-latest',
     contents: [{ parts: [{ text: prompt }] }],
     config: {
-      tools: [{ googleSearch: {} }],
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.ARRAY,
