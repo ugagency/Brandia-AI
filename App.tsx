@@ -204,6 +204,33 @@ const App: React.FC = () => {
     setCurrentProjectId(null);
   };
 
+  const handleUpdateProfile = async (newProfile: BusinessProfile) => {
+    setIsLoading(true);
+    try {
+      setProfile(newProfile);
+      const plan = await generateMarketingPlan(newProfile);
+      setMarketingPlan(plan);
+
+      // Se já houver um projeto carregado, salva as alterações automaticamente
+      if (currentProjectId && user) {
+        const project: Project = {
+          id: currentProjectId,
+          projectName: newProfile.name,
+          createdAt: new Date().toISOString(),
+          profile: newProfile,
+          plan: plan
+        };
+        await storageService.saveProject(user.email, project);
+        await loadUserProjects(user.email);
+      }
+    } catch (error: any) {
+      console.error("Error updating plan:", error);
+      alert(`Erro: ${error.message || "Falha ao atualizar o plano."}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-main-gradient">
@@ -278,8 +305,8 @@ const App: React.FC = () => {
           <LogoComponent className="h-8" />
         </div>
         <div className="flex items-center gap-4">
-          {!isStarted && !isLoading && projects.length > 0 && (
-            <button onClick={() => setShowProjects(!showProjects)} className="text-xs font-bold text-slate-400 uppercase hover:text-stratyx-green transition-colors">
+          {projects.length > 0 && (
+            <button onClick={() => { setShowProjects(!showProjects); setIsStarted(false); }} className="text-xs font-bold text-slate-400 uppercase hover:text-stratyx-green transition-colors">
               {showProjects ? 'Início' : `Meus Planos (${projects.length})`}
             </button>
           )}
@@ -354,6 +381,7 @@ const App: React.FC = () => {
             onSaveProject={saveProject}
             onTogglePostStatus={handleTogglePostStatus}
             onExtendCalendar={handleExtendCalendar}
+            onUpdateProfile={handleUpdateProfile}
             isSaving={isSaving}
             isExtending={isExtending}
           />

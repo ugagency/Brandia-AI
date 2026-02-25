@@ -11,6 +11,7 @@ interface DashboardProps {
   onSaveProject: (projectName: string) => void;
   onTogglePostStatus: (postId: string) => void;
   onExtendCalendar: () => void;
+  onUpdateProfile: (profile: BusinessProfile) => void;
   isSaving?: boolean;
   isExtending?: boolean;
 }
@@ -22,13 +23,15 @@ const Dashboard: React.FC<DashboardProps> = ({
   onSaveProject,
   onTogglePostStatus,
   onExtendCalendar,
+  onUpdateProfile,
   isSaving,
   isExtending
 }) => {
-  const [activeTab, setActiveTab] = useState<'marca' | 'conteudo' | 'execucao' | 'concorrencia' | 'canais'>('execucao');
+  const [activeTab, setActiveTab] = useState<'marca' | 'conteudo' | 'execucao' | 'concorrencia' | 'canais' | 'config'>('execucao');
   const [selectedPost, setSelectedPost] = useState<PostItem | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
   const [tempProjectName, setTempProjectName] = useState(profile.name);
+  const [editProfile, setEditProfile] = useState<BusinessProfile>({ ...profile });
 
   const handleSave = () => {
     onSaveProject(tempProjectName);
@@ -159,14 +162,14 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Tabs */}
       <div className="no-print flex bg-black/20 backdrop-blur-md p-2 rounded-2xl shadow-xl border border-white/5 mb-8 sticky top-4 z-10 overflow-x-auto">
-        {(['marca', 'conteudo', 'concorrencia', 'canais', 'execucao'] as const).map((tab) => (
+        {(['marca', 'conteudo', 'concorrencia', 'canais', 'execucao', 'config'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`whitespace-nowrap flex-1 py-4 px-6 rounded-xl font-black uppercase text-xs tracking-widest transition-all ${activeTab === tab ? 'bg-stratyx-green text-slate-950 shadow-lg shadow-stratyx-green/10' : 'text-slate-400 hover:text-stratyx-white'
               }`}
           >
-            {tab === 'marca' ? 'Marca' : tab === 'conteudo' ? 'Estratégia' : tab === 'concorrencia' ? 'Rivais' : tab === 'canais' ? 'Omnichannel' : 'Calendário'}
+            {tab === 'marca' ? 'Marca' : tab === 'conteudo' ? 'Estratégia' : tab === 'concorrencia' ? 'Rivais' : tab === 'canais' ? 'Omnichannel' : tab === 'execucao' ? 'Calendário' : 'Config'}
           </button>
         ))}
       </div>
@@ -332,6 +335,66 @@ const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Configurações */}
+        {activeTab === 'config' && (
+          <div className="animate-in fade-in duration-500">
+            <div className="bg-black/20 p-10 rounded-[2.5rem] border border-white/5 max-w-2xl mx-auto">
+              <h2 className="text-3xl font-black text-stratyx-white mb-2 tracking-tighter uppercase">CONFIGURAÇÕES ESTRATÉGICAS</h2>
+              <p className="text-slate-500 mb-10 font-medium">Ajuste o motor STRATYX para novos objetivos.</p>
+
+              <div className="space-y-8 text-left">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Objetivo Principal</label>
+                  <select
+                    className="w-full p-4 bg-black/40 rounded-2xl border-2 border-white/5 text-stratyx-white font-bold outline-none focus:border-stratyx-green transition-all"
+                    value={editProfile.objective}
+                    onChange={e => setEditProfile({ ...editProfile, objective: e.target.value as any })}
+                  >
+                    <option value="vender">Conversão Bruta (Vendas)</option>
+                    <option value="atrair">Expansão de Audiência (Atrair)</option>
+                    <option value="autoridade">Posicionamento de Autoridade</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Tom de Voz & Estilo</label>
+                  <select
+                    className="w-full p-4 bg-black/40 rounded-2xl border-2 border-white/5 text-stratyx-white font-bold outline-none focus:border-stratyx-green transition-all"
+                    value={editProfile.style}
+                    onChange={e => setEditProfile({ ...editProfile, style: e.target.value as any })}
+                  >
+                    <option value="popular">Impacto Direto (Popular)</option>
+                    <option value="descontraido">Criatividade Disruptiva (Descontraído)</option>
+                    <option value="serio">Executivo Premium (Sério)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Frequência Diária ({editProfile.postsPerDay} posts)</label>
+                  <input
+                    type="range" min="1" max="5"
+                    className="w-full accent-stratyx-green mb-2"
+                    value={editProfile.postsPerDay}
+                    onChange={e => setEditProfile({ ...editProfile, postsPerDay: parseInt(e.target.value) })}
+                  />
+                </div>
+
+                <div className="pt-6">
+                  <button
+                    onClick={() => onUpdateProfile(editProfile)}
+                    className="w-full bg-gradient-to-r from-stratyx-green to-emerald-400 text-slate-950 py-5 rounded-[2rem] font-black text-lg hover:brightness-110 shadow-xl shadow-stratyx-green/20 transition-all"
+                  >
+                    REGENERAR ESTRATÉGIA COMPLETA 🚀
+                  </button>
+                  <p className="text-center text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-4">
+                    ⚠️ Ao regenerar, o calendário atual será substituído pela nova estratégia.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}
