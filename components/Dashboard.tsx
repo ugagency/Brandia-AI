@@ -275,6 +275,66 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
         )}
+
+        {/* Estratégia (conteudo) */}
+        {activeTab === 'conteudo' && (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="bg-black/20 p-10 rounded-[2.5rem] border border-white/5">
+              <h2 className="text-3xl font-black text-stratyx-white mb-6 uppercase tracking-tighter">Diretrizes Estratégicas</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div>
+                  <h4 className="text-stratyx-green font-black text-xs uppercase tracking-widest mb-4">Formatos Recomendados</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {plan.strategy.formats.map((f, i) => (
+                      <span key={i} className="bg-white/5 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 border border-white/5">{f}</span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-stratyx-green font-black text-xs uppercase tracking-widest mb-4">Tópicos Quentes (2025)</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {plan.strategy.hotTopics.map((t, i) => (
+                      <span key={i} className="bg-stratyx-green/10 px-4 py-2 rounded-xl text-xs font-black text-stratyx-green border border-stratyx-green/20"># {t}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-10 pt-10 border-t border-white/5">
+                <h4 className="text-slate-500 font-black text-[10px] uppercase tracking-widest mb-4">Racional de Dominação</h4>
+                <p className="text-slate-300 leading-relaxed italic">"{plan.strategy.rationale}"</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Concorrentes (concorrencia) */}
+        {activeTab === 'concorrencia' && (
+          <div className="animate-in fade-in duration-500">
+            <h2 className="text-3xl font-black text-stratyx-white mb-8 tracking-tighter uppercase">MAPA DE RIVAIS & OPORTUNIDADES</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {plan.competitors?.map((comp, i) => (
+                <div key={i} className="bg-black/20 p-8 rounded-[2.5rem] border border-white/5 hover:border-stratyx-green transition-all group overflow-hidden relative">
+                  <div className="absolute top-0 right-0 p-4">
+                    <span className="text-[10px] font-black text-stratyx-green bg-stratyx-green/10 px-3 py-1 rounded-full uppercase italic">{comp.engagementLevel}</span>
+                  </div>
+                  <h3 className="text-2xl font-black text-stratyx-white mb-2 group-hover:text-stratyx-green transition-colors">{comp.name}</h3>
+                  <p className="text-slate-500 text-[10px] font-black uppercase mb-6">{comp.postTypes}</p>
+
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-600 uppercase mb-1">Atividade Recente</p>
+                      <p className="text-xs text-slate-400 font-medium">{comp.recentActivity}</p>
+                    </div>
+                    <div className="p-4 bg-stratyx-green/5 rounded-2xl border border-stratyx-green/20">
+                      <p className="text-[10px] font-black text-stratyx-green uppercase mb-1">Ponto de Ruptura / Oportunidade</p>
+                      <p className="text-xs text-stratyx-white font-bold italic">"{comp.opportunity}"</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal Detalhe */}

@@ -88,15 +88,15 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
     PÚBLICO-ALVO: ${profile.targetAudience} em ${profile.region}.
     OBJETIVO: ${profile.objective}. ESTILO: ${profile.style}. 
     PLATAFORMAS SELECIONADAS: ${profile.selectedPlatforms.join(', ')}.
-    FREQUÊNCIA: ${profile.postsPerDay} post(s) por dia nos dias: ${profile.selectedDaysOfWeek.join(', ')}.
+    FREQUÊNCIA: ${profile.postsPerDay} post(s) por dia PARA CADA plataforma selecionada nos dias: ${profile.selectedDaysOfWeek.join(', ')}.
 
     REQUISITOS OBRIGATÓRIOS:
-    1. CALENDÁRIO MENSAL: Gere posts respeitando as plataformas selecionadas, os dias da semana e a frequência diária. Se um dia não estiver na lista de dias selecionados, não gere posts para ele.
+    1. CALENDÁRIO: Gere o máximo de posts iniciais que puder (mínimo 15), respeitando RIGOROSAMENTE a frequência de ${profile.postsPerDay} posts em CADA plataforma selecionada para os dias escolhidos.
     2. GANCHOS E CTAS: Use ganchos de 3s e CTAs agressivos para conversão.
-    3. TENDÊNCIAS: Pesquise tendências de 2025 via Google Search para ${profile.businessType}.
-    4. RESUMO ESTRATÉGICO (summary): Escreva um parágrafo conciso explicando POR QUE esse estilo de post e essas plataformas serão eficazes para o público-alvo ${profile.targetAudience}, considerando o produto ${profile.name}.
-    5. ADAPTAÇÃO: Selecione os 3 melhores posts e adapte para as plataformas selecionadas.
-    6. CONCORRÊNCIA: Liste 3 rivais em ${profile.region}.
+    3. TENDÊNCIAS: Use sua ferramenta de busca para pesquisar tendências REAIS de 2025 para ${profile.businessType} e ${profile.region}.
+    4. ESTRATÉGIA (strategy): Detalhe os formatos ideais, frequência e um racional robusto do porquê desta abordagem.
+    5. COMPETIDORES: Use a busca para identificar 3 rivais REAIS em ${profile.region} para ${profile.businessType} e preencha a seção competitors com detalhes de seus pontos fracos.
+    6. RESUMO ESTRATÉGICO (summary): Um parágrafo de alto impacto sobre o potencial deste plano.
 
     IMPORTANT: Return EXACTLY a valid JSON object matching the requested schema. No conversational text.
   `;
@@ -106,6 +106,7 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
     model: 'gemini-flash-latest',
     contents: [{ parts: [{ text: prompt }] }],
     config: {
+      tools: [{ googleSearch: {} }],
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -208,8 +209,12 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
   const text = response.text;
   if (!text) throw new Error("Empty response from AI");
 
+  // Extract grounding chunks for compliance with Search transparency requirements
+  const groundingSources = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+
   try {
-    return JSON.parse(text);
+    const plan = JSON.parse(text);
+    return { ...plan, groundingSources };
   } catch (err) {
     console.error("JSON Parse Error. Raw response:", text);
     throw new Error("Falha ao processar os dados da IA. O formato retornado é inválido.");
@@ -221,10 +226,12 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
   const existingTopics = existingPosts.map(p => p.topic).slice(-10).join(', ');
 
   const prompt = `
-    Aja como Estrategista de Conteúdo Sênior da STRATYX. Gere mais 10 posts novos para ${profile.name} do dia ${lastDay + 1} em diante.
-    Respeite as plataformas: ${profile.selectedPlatforms.join(', ')} e os dias selecionados: ${profile.selectedDaysOfWeek.join(', ')}.
+    Aja como Estrategista de Conteúdo Sênior da STRATYX. Gere mais 15 posts novos para ${profile.name} do dia ${lastDay + 1} em diante.
+    Respeite RIGOROSAMENTE a frequência: ${profile.postsPerDay} post(s) por dia PARA CADA plataforma selecionada: ${profile.selectedPlatforms.join(', ')}.
+    Dias da semana permitidos: ${profile.selectedDaysOfWeek.join(', ')}.
     Contexto do produto: ${profile.productDescription}.
-    NÃO REPITA ESTES TEMAS: ${existingTopics}.
+    Público: ${profile.targetAudience} em ${profile.region}.
+    NÃO REPITA ESTES TEMAS JÁ USADOS: ${existingTopics}.
     Retorne apenas um array JSON de PostItem.
   `;
 
@@ -233,6 +240,7 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
     model: 'gemini-flash-latest',
     contents: [{ parts: [{ text: prompt }] }],
     config: {
+      tools: [{ googleSearch: {} }],
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.ARRAY,
