@@ -22,6 +22,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
     selectedPlatforms: ['Instagram', 'TikTok'],
     postsPerDay: 1,
     selectedDaysOfWeek: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+    businessStage: 'iniciando',
     manualColors: []
   });
 
@@ -39,7 +40,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
     reader.onload = async (event) => {
       const base64 = event.target?.result as string;
       setProfile(prev => ({ ...prev, logoUrl: base64 }));
-      
+
       setExtractingColors(true);
       try {
         const colors = await extractColorsFromLogo(base64);
@@ -59,8 +60,8 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
       if (exists && prev.selectedPlatforms.length === 1) return prev; // Keep at least one
       return {
         ...prev,
-        selectedPlatforms: exists 
-          ? prev.selectedPlatforms.filter(item => item !== p) 
+        selectedPlatforms: exists
+          ? prev.selectedPlatforms.filter(item => item !== p)
           : [...prev.selectedPlatforms, p]
       };
     });
@@ -72,8 +73,8 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
       if (exists && prev.selectedDaysOfWeek.length === 1) return prev;
       return {
         ...prev,
-        selectedDaysOfWeek: exists 
-          ? prev.selectedDaysOfWeek.filter(item => item !== day) 
+        selectedDaysOfWeek: exists
+          ? prev.selectedDaysOfWeek.filter(item => item !== day)
           : [...prev.selectedDaysOfWeek, day]
       };
     });
@@ -128,7 +129,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
             </div>
             <div>
               <label className={labelClasses}>Nome da Marca</label>
-              <input required type="text" placeholder="Ex: Stratyx Corp" className={inputClasses} value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
+              <input required type="text" placeholder="Ex: Stratyx Corp" className={inputClasses} value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} />
             </div>
             <button type="button" onClick={nextStep} className="w-full bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black text-lg hover:brightness-110 shadow-xl shadow-stratyx-green/10 transition-all">PRÓXIMO</button>
           </div>
@@ -138,11 +139,11 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
               <label className={labelClasses}>Nicho & Mecânica</label>
-              <input required type="text" placeholder="Ex: Ecommerce de Moda, Consultoria Financeira" className={inputClasses} value={profile.businessType} onChange={e => setProfile({...profile, businessType: e.target.value})} />
+              <input required type="text" placeholder="Ex: Ecommerce de Moda, Consultoria Financeira" className={inputClasses} value={profile.businessType} onChange={e => setProfile({ ...profile, businessType: e.target.value })} />
             </div>
             <div>
               <label className={labelClasses}>Descrição do Produto</label>
-              <textarea required placeholder="Quais os diferenciais e o que torna seu produto dominante?" className={textareaClasses} value={profile.productDescription} onChange={e => setProfile({...profile, productDescription: e.target.value})} />
+              <textarea required placeholder="Quais os diferenciais e o que torna seu produto dominante?" className={textareaClasses} value={profile.productDescription} onChange={e => setProfile({ ...profile, productDescription: e.target.value })} />
             </div>
             <div className="flex gap-4">
               <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
@@ -155,11 +156,11 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
               <label className={labelClasses}>Alvo & Região</label>
-              <input required type="text" placeholder="Ex: Profissionais liberais, Brasil" className={inputClasses} value={profile.targetAudience} onChange={e => setProfile({...profile, targetAudience: e.target.value})} />
+              <input required type="text" placeholder="Ex: Profissionais liberais, Brasil" className={inputClasses} value={profile.targetAudience} onChange={e => setProfile({ ...profile, targetAudience: e.target.value })} />
             </div>
             <div>
               <label className={labelClasses}>Região Geográfica</label>
-              <input required type="text" placeholder="Ex: Nacional, São Paulo" className={inputClasses} value={profile.region} onChange={e => setProfile({...profile, region: e.target.value})} />
+              <input required type="text" placeholder="Ex: Nacional, São Paulo" className={inputClasses} value={profile.region} onChange={e => setProfile({ ...profile, region: e.target.value })} />
             </div>
             <div className="flex gap-4">
               <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
@@ -174,8 +175,8 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
               <label className={labelClasses}>Plataformas Desejadas</label>
               <div className="flex flex-wrap gap-2">
                 {platforms.map(p => (
-                  <button 
-                    key={p} 
+                  <button
+                    key={p}
                     type="button"
                     onClick={() => togglePlatform(p)}
                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border-2 ${profile.selectedPlatforms.includes(p) ? 'bg-stratyx-green text-slate-950 border-stratyx-green' : 'bg-black/20 text-slate-500 border-white/5'}`}
@@ -188,11 +189,11 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
             <div>
               <label className={labelClasses}>Frequência Diária</label>
               <div className="flex items-center gap-4">
-                <input 
-                  type="range" min="1" max="5" 
-                  className="flex-1 accent-stratyx-green" 
-                  value={profile.postsPerDay} 
-                  onChange={e => setProfile({...profile, postsPerDay: parseInt(e.target.value)})} 
+                <input
+                  type="range" min="1" max="5"
+                  className="flex-1 accent-stratyx-green"
+                  value={profile.postsPerDay}
+                  onChange={e => setProfile({ ...profile, postsPerDay: parseInt(e.target.value) })}
                 />
                 <span className="text-xl font-black text-stratyx-green w-10 text-center">{profile.postsPerDay}</span>
               </div>
@@ -201,8 +202,8 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
               <label className={labelClasses}>Dias da Semana</label>
               <div className="flex flex-wrap gap-2">
                 {daysOfWeek.map(day => (
-                  <button 
-                    key={day} 
+                  <button
+                    key={day}
                     type="button"
                     onClick={() => toggleDay(day)}
                     className={`px-3 py-2 rounded-xl text-[10px] font-bold transition-all border-2 ${profile.selectedDaysOfWeek.includes(day) ? 'bg-stratyx-green text-slate-950 border-stratyx-green' : 'bg-black/20 text-slate-500 border-white/5'}`}
@@ -223,15 +224,23 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
               <label className={labelClasses}>Objetivo de Escala</label>
-              <select className={inputClasses} value={profile.objective} onChange={e => setProfile({...profile, objective: e.target.value as any})}>
+              <select className={inputClasses} value={profile.objective} onChange={e => setProfile({ ...profile, objective: e.target.value as any })}>
                 <option value="vender">Conversão Bruta</option>
                 <option value="atrair">Expansão de Audiência</option>
                 <option value="autoridade">Posicionamento de Autoridade</option>
               </select>
             </div>
             <div>
+              <label className={labelClasses}>Momento do Negócio</label>
+              <select className={inputClasses} value={profile.businessStage} onChange={e => setProfile({ ...profile, businessStage: e.target.value as any })}>
+                <option value="iniciando">Iniciando do Zero (Novo Perfil)</option>
+                <option value="reposicionando">Mudança de Direção / Pivotagem</option>
+                <option value="escalando">Consolidado e Pronto para Escalar</option>
+              </select>
+            </div>
+            <div>
               <label className={labelClasses}>Tom de Voz</label>
-              <select className={inputClasses} value={profile.style} onChange={e => setProfile({...profile, style: e.target.value as any})}>
+              <select className={inputClasses} value={profile.style} onChange={e => setProfile({ ...profile, style: e.target.value as any })}>
                 <option value="popular">Impacto Direto</option>
                 <option value="descontraido">Criatividade Disruptiva</option>
                 <option value="serio">Executivo Premium</option>

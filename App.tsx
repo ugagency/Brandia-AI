@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import OnboardingForm from './components/OnboardingForm';
 import Dashboard from './components/Dashboard';
-import { BusinessProfile, MarketingPlan, Project } from './types';
+import { BusinessProfile, MarketingPlan, Project, PostItem } from './types';
 
-import { generateMarketingPlan, extendCalendar } from './services/geminiService';
+import { generateMarketingPlan, extendCalendar, regenerateSinglePost } from './services/geminiService';
 import { storageService } from './services/storageService';
 import { LogoComponent } from './constants';
 import { supabase } from './services/supabase';
@@ -204,6 +204,29 @@ const App: React.FC = () => {
     setCurrentProjectId(null);
   };
 
+  const handleRegeneratePost = async (post: PostItem): Promise<PostItem> => {
+    if (!profile || !marketingPlan || !user) throw new Error("Missing profile, plan or user");
+    try {
+      const newPost = await regenerateSinglePost(profile, post);
+      const updatedCalendar = marketingPlan.calendar.map(p => p.id === post.id ? { ...newPost, id: post.id } : p);
+      const newPlan = { ...marketingPlan, calendar: updatedCalendar };
+      setMarketingPlan(newPlan);
+
+      if (currentProjectId) {
+        const currentProject = projects.find(p => p.id === currentProjectId);
+        if (currentProject) {
+          const updatedProject = { ...currentProject, plan: newPlan };
+          await storageService.saveProject(user.email, updatedProject);
+          await loadUserProjects(user.email);
+        }
+      }
+      return { ...newPost, id: post.id };
+    } catch (error) {
+      console.error("Error regenerating post:", error);
+      throw error;
+    }
+  };
+
   const handleUpdateProfile = async (newProfile: BusinessProfile) => {
     setIsLoading(true);
     try {
@@ -382,6 +405,7 @@ const App: React.FC = () => {
             onTogglePostStatus={handleTogglePostStatus}
             onExtendCalendar={handleExtendCalendar}
             onUpdateProfile={handleUpdateProfile}
+            onRegeneratePost={handleRegeneratePost}
             isSaving={isSaving}
             isExtending={isExtending}
           />

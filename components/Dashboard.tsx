@@ -12,6 +12,7 @@ interface DashboardProps {
   onTogglePostStatus: (postId: string) => void;
   onExtendCalendar: () => void;
   onUpdateProfile: (profile: BusinessProfile) => void;
+  onRegeneratePost: (post: PostItem) => Promise<PostItem>;
   isSaving?: boolean;
   isExtending?: boolean;
 }
@@ -24,6 +25,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   onTogglePostStatus,
   onExtendCalendar,
   onUpdateProfile,
+  onRegeneratePost,
   isSaving,
   isExtending
 }) => {
@@ -32,6 +34,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [isRenaming, setIsRenaming] = useState(false);
   const [tempProjectName, setTempProjectName] = useState(profile.name);
   const [editProfile, setEditProfile] = useState<BusinessProfile>({ ...profile });
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   const handleSave = () => {
     onSaveProject(tempProjectName);
@@ -148,14 +151,12 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-4 no-print">
-          <button onClick={handleJSONExport} className="bg-slate-800/50 text-slate-400 p-3 rounded-2xl hover:bg-slate-800 transition-all border border-white/5" title="Exportar JSON">
+          <button onClick={onExportPDF} className="bg-slate-800 text-stratyx-white px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:bg-slate-700 transition-all border border-white/10 text-xs uppercase tracking-widest shadow-xl">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+            Exportar PDF Completo
           </button>
-          <button onClick={onExportPDF} className="bg-slate-800 text-stratyx-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-slate-700 transition-all border border-white/10">
-            PDF
-          </button>
-          <button onClick={handleSave} disabled={isSaving} className="bg-stratyx-green text-slate-950 px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:brightness-110 shadow-lg shadow-stratyx-green/10">
-            {isSaving ? 'SALVANDO...' : 'SALVAR PLANO'}
+          <button onClick={handleSave} disabled={isSaving} className="bg-stratyx-green text-slate-950 px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:brightness-110 shadow-lg shadow-stratyx-green/20 text-xs uppercase tracking-widest">
+            {isSaving ? 'SALVANDO...' : 'SALVAR NO PERFIL'}
           </button>
         </div>
       </div>
@@ -265,8 +266,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         )}
 
         {/* Marca */}
-        {activeTab === 'marca' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-500">
+        {(activeTab === 'marca' || window.matchMedia('print').matches) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-500 page-break">
             <div className="bg-black/20 p-10 rounded-[2.5rem] border border-white/5">
               <h3 className="font-black text-slate-500 uppercase text-[10px] tracking-widest mb-6">Identidade de Bio</h3>
               <p className="text-2xl font-black text-stratyx-white italic tracking-tighter mb-4 leading-tight">"{plan.identity.bio}"</p>
@@ -280,8 +281,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         )}
 
         {/* Estratégia (conteudo) */}
-        {activeTab === 'conteudo' && (
-          <div className="space-y-8 animate-in fade-in duration-500">
+        {(activeTab === 'conteudo' || window.matchMedia('print').matches) && (
+          <div className="space-y-8 animate-in fade-in duration-500 page-break">
             <div className="bg-black/20 p-10 rounded-[2.5rem] border border-white/5">
               <h2 className="text-3xl font-black text-stratyx-white mb-6 uppercase tracking-tighter">Diretrizes Estratégicas</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -311,8 +312,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         )}
 
         {/* Concorrentes (concorrencia) */}
-        {activeTab === 'concorrencia' && (
-          <div className="animate-in fade-in duration-500">
+        {(activeTab === 'concorrencia' || window.matchMedia('print').matches) && (
+          <div className="animate-in fade-in duration-500 page-break">
             <h2 className="text-3xl font-black text-stratyx-white mb-8 tracking-tighter uppercase">MAPA DE RIVAIS & OPORTUNIDADES</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {plan.competitors?.map((comp, i) => (
@@ -357,6 +358,19 @@ const Dashboard: React.FC<DashboardProps> = ({
                     <option value="vender">Conversão Bruta (Vendas)</option>
                     <option value="atrair">Expansão de Audiência (Atrair)</option>
                     <option value="autoridade">Posicionamento de Autoridade</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Momento do Negócio</label>
+                  <select
+                    className="w-full p-4 bg-black/40 rounded-2xl border-2 border-white/5 text-stratyx-white font-bold outline-none focus:border-stratyx-green transition-all"
+                    value={editProfile.businessStage}
+                    onChange={e => setEditProfile({ ...editProfile, businessStage: e.target.value as any })}
+                  >
+                    <option value="iniciando">Iniciando do Zero</option>
+                    <option value="reposicionando">Mudança de Direção (Pivot)</option>
+                    <option value="escalando">Pronto para Escalar</option>
                   </select>
                 </div>
 
@@ -429,7 +443,24 @@ const Dashboard: React.FC<DashboardProps> = ({
               </section>
             </div>
             <div className="p-8 bg-black/50 border-t border-white/10 flex gap-4">
-              <button onClick={() => { onTogglePostStatus(selectedPost.id); setSelectedPost(null); }} className={`flex-1 py-5 rounded-[2rem] font-black text-lg transition-all ${selectedPost.status === 'posted' ? 'bg-slate-800 text-slate-500' : 'bg-stratyx-green text-slate-950 shadow-2xl'}`}>
+              <button 
+                onClick={async () => {
+                  if (selectedPost) {
+                    setIsRegenerating(true);
+                    try {
+                      const newPost = await onRegeneratePost(selectedPost);
+                      setSelectedPost(newPost);
+                    } finally {
+                      setIsRegenerating(false);
+                    }
+                  }
+                }} 
+                disabled={isRegenerating}
+                className="flex-1 py-5 rounded-[2rem] font-bold text-slate-400 hover:text-stratyx-white transition-all bg-white/5 border border-white/10 disabled:opacity-50"
+              >
+                {isRegenerating ? 'CRIANDO NOVO INSIGHT...' : 'REFAZER ESTA IDÉIA ↺'}
+              </button>
+              <button onClick={() => { onTogglePostStatus(selectedPost.id); setSelectedPost(null); }} className={`flex-[1.5] py-5 rounded-[2rem] font-black text-lg transition-all ${selectedPost.status === 'posted' ? 'bg-slate-800 text-slate-500' : 'bg-stratyx-green text-slate-950 shadow-2xl hover:brightness-110'}`}>
                 {selectedPost.status === 'posted' ? 'Marcar como Pendente' : 'Marcar como Publicado ✓'}
               </button>
             </div>

@@ -86,12 +86,15 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
     TIPO DE NEGÓCIO: ${profile.businessType}.
     DESCRIÇÃO DETALHADA DO PRODUTO: ${profile.productDescription}.
     PÚBLICO-ALVO: ${profile.targetAudience} em ${profile.region}.
+    MOMENTO ATUAL: ${profile.businessStage}.
     OBJETIVO: ${profile.objective}. ESTILO: ${profile.style}. 
     PLATAFORMAS SELECIONADAS: ${profile.selectedPlatforms.join(', ')}.
     FREQUÊNCIA: ${profile.postsPerDay} post(s) por dia PARA CADA plataforma selecionada nos dias: ${profile.selectedDaysOfWeek.join(', ')}.
 
     REQUISITOS OBRIGATÓRIOS:
-    1. CALENDÁRIO: Gere o máximo de posts iniciais que puder (mínimo 15), respeitando RIGOROSAMENTE a frequência de ${profile.postsPerDay} posts em CADA plataforma selecionada para os dias escolhidos.
+    1. CALENDÁRIO: Gere um calendário robusto de posts. A regra de frequência é INDIVIDUAL por plataforma. 
+       EXEMPLO: Se selecionou 3 plataformas e 2 posts/dia, você deve gerar 6 posts NO TOTAL para cada dia válido (2 p/ cada rede).
+       Respeite RIGOROSAMENTE a frequência de ${profile.postsPerDay} posts em CADA plataforma selecionada (${profile.selectedPlatforms.join(', ')}) para os dias escolhidos.
     2. GANCHOS E CTAS: Use ganchos de 3s e CTAs agressivos para conversão.
     3. TENDÊNCIAS: Use sua ferramenta de busca para pesquisar tendências REAIS de 2025 para ${profile.businessType} e ${profile.region}.
     4. ESTRATÉGIA (strategy): Detalhe os formatos ideais, frequência e um racional robusto do porquê desta abordagem.
@@ -226,12 +229,13 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
   const existingTopics = existingPosts.map(p => p.topic).slice(-10).join(', ');
 
   const prompt = `
-    Aja como Estrategista de Conteúdo Sênior da STRATYX. Gere mais 15 posts novos para ${profile.name} do dia ${lastDay + 1} em diante.
-    Respeite RIGOROSAMENTE a frequência: ${profile.postsPerDay} post(s) por dia PARA CADA plataforma selecionada: ${profile.selectedPlatforms.join(', ')}.
-    Dias da semana permitidos: ${profile.selectedDaysOfWeek.join(', ')}.
-    Contexto do produto: ${profile.productDescription}.
-    Público: ${profile.targetAudience} em ${profile.region}.
-    NÃO REPITA ESTES TEMAS JÁ USADOS: ${existingTopics}.
+    Aja como Estrategista de Conteúdo Sênior da STRATYX. Gere mais posts novos para ${profile.name} do dia ${lastDay + 1} em diante.
+    REGRA DE OURO: A frequência de ${profile.postsPerDay} posts é POR plataforma individualmente. 
+    Se o usuário escolher 3 canais e 3 posts/dia, você deve gerar 9 itens para este dia.
+    Plataformas: ${profile.selectedPlatforms.join(', ')}.
+    Dias: ${profile.selectedDaysOfWeek.join(', ')}.
+    Contexto: ${profile.productDescription}. Público: ${profile.targetAudience} em ${profile.region}.
+    NÃO REPITA ESTES TEMAS: ${existingTopics}.
     Retorne apenas um array JSON de PostItem.
   `;
 
@@ -251,5 +255,31 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
 
   const text = response.text;
   if (!text) throw new Error("Empty response from AI extension");
+  return JSON.parse(text);
+};
+
+export const regenerateSinglePost = async (profile: BusinessProfile, post: PostItem): Promise<PostItem> => {
+  const prompt = `
+    Aja como Estrategista de Conteúdo Sênior da STRATYX. 
+    O usuário não gostou deste post: "${post.topic}".
+    Crie um NOVO post substituto para a mesma plataforma (${post.platform}) e mesmo dia (${post.dayOfMonth}).
+    CONTEXTO DO NEGÓCIO: ${profile.productDescription}.
+    OBJETIVO: ${profile.objective}.
+    O novo post deve ser MAIS criativo, ter um gancho MAIS forte e ser completamente diferente do anterior.
+    Retorne apenas o objeto JSON conforme o schema PostItem.
+  `;
+
+  const ai = getAI();
+  const response = await ai.models.generateContent({
+    model: 'gemini-flash-latest',
+    contents: [{ parts: [{ text: prompt }] }],
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: POST_SCHEMA
+    }
+  });
+
+  const text = response.text;
+  if (!text) throw new Error("Empty response from AI regeneration");
   return JSON.parse(text);
 };

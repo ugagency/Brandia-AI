@@ -33,7 +33,7 @@
     @media print {
       @page {
         size: A4;
-        margin: 15mm;
+        margin: 10mm;
       }
 
       .no-print {
@@ -46,6 +46,7 @@
 
       .page-break {
         page-break-before: always;
+        padding-top: 2rem;
       }
 
       .avoid-break {
@@ -54,34 +55,77 @@
 
       body {
         background: white !important;
-        color: black !important;
+        color: #0f172a !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
 
-      .bg-slate-950,
+      .main-content-area {
+        display: block !important;
+      }
+
+      .bg-black\/10,
+      .bg-black\/20,
+      .bg-black\/30,
+      .bg-black\/40,
+      .bg-white\/5,
       .bg-slate-900,
-      .bg-stratyx-dark-start {
-        background-color: white !important;
-        color: black !important;
-      }
-
-      .shadow-sm,
-      .shadow-md,
-      .shadow-lg,
-      .shadow-xl,
-      .shadow-2xl {
-        box-shadow: none !important;
+      .bg-slate-800 {
+        background-color: #f8fafc !important;
         border: 1px solid #e2e8f0 !important;
+        color: #1e293b !important;
       }
 
+      .text-stratyx-white,
+      .text-slate-200,
+      .text-slate-300,
+      .text-slate-400 {
+        color: #1e293b !important;
+      }
+
+      .text-stratyx-green {
+        color: #059669 !important;
+        /* Darker green for readability */
+      }
+
+      .bg-stratyx-green {
+        background-color: #39FF6A !important;
+      }
+
+      .bg-gradient-to-br,
+      .bg-gradient-to-tr,
+      .bg-gradient-to-r {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        border: 2px solid #39FF6A !important;
+      }
+
+      .shadow-none-print {
+        box-shadow: none !important;
+      }
+
+      .border-white\/5,
+      .border-white\/10 {
+        border-color: #e2e8f0 !important;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        color: #0f172a !important;
+        page-break-after: avoid;
+      }
+
+      /* Specific fixes for dashboard items */
+      .grid {
+        display: grid !important;
+      }
+
+      .rounded-\[2\.5rem\],
+      .rounded-\[3rem\],
       .rounded-3xl {
         border-radius: 1rem !important;
-      }
-
-      .text-stratyx-green,
-      .text-green-400 {
-        color: #000 !important;
       }
     }
 

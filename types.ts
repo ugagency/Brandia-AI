@@ -10,8 +10,9 @@ export interface BusinessProfile {
   selectedPlatforms: Platform[]; // User choice
   postsPerDay: number; // Frequency
   selectedDaysOfWeek: string[]; // ['Segunda', 'Quarta', ...]
-  logoUrl?: string; 
-  manualColors?: string[]; 
+  businessStage: 'iniciando' | 'reposicionando' | 'escalando';
+  logoUrl?: string;
+  manualColors?: string[];
 }
 
 export interface BrandIdentity {
