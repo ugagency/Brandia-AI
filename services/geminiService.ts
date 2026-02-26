@@ -74,9 +74,10 @@ const POST_SCHEMA = {
     status: { type: Type.STRING, description: "Must be 'pending'" },
     isTrend: { type: Type.BOOLEAN },
     dayOfMonth: { type: Type.INTEGER },
+    funnelStage: { type: Type.STRING, description: "Must be 'ToFu', 'MoFu', or 'BoFu'" },
     reelsMetadata: REELS_METADATA_SCHEMA
   },
-  required: ["id", "type", "topic", "hook", "caption", "hashtags", "bestTime", "platform", "status", "dayOfMonth"]
+  required: ["id", "type", "topic", "hook", "caption", "hashtags", "bestTime", "platform", "status", "dayOfMonth", "funnelStage"]
 };
 
 export const generateMarketingPlan = async (profile: BusinessProfile): Promise<MarketingPlan> => {
@@ -99,7 +100,12 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
     3. TENDÊNCIAS: Use sua ferramenta de busca para pesquisar tendências REAIS de 2025 para ${profile.businessType} e ${profile.region}.
     4. ESTRATÉGIA (strategy): Detalhe os formatos ideais, frequência e um racional robusto do porquê desta abordagem.
     5. COMPETIDORES: Use a busca para identificar 3 rivais REAIS em ${profile.region} para ${profile.businessType} e preencha a seção competitors com detalhes de seus pontos fracos.
-    6. RESUMO ESTRATÉGICO (summary): Um parágrafo de alto impacto sobre o potencial deste plano.
+    6. FUNIL DE VENDAS (A CORAÇÃO DO PLANO): Aplique a metodologia ToFu, MoFu e BoFu. CADA post do calendário deve ser obrigatoriamente classificado para uma destas etapas.
+       - ToFu (40% dos posts): Atração e Descoberta. Foco em educar e atrair novos olhos.
+       - MoFu (40% dos posts): Consideração e Autoridade. Foco em resolver problemas e criar conexão.
+       - BoFu (20% dos posts): Decisão e Venda. Foco em ofertas, depoimentos e chamadas diretas para ação.
+    7. DETALHAMENTO: As legendas devem ser ricas, estratégicas e prontas para uso, refletindo o tom de voz ${profile.style}.
+    8. RESUMO ESTRATÉGICO (summary): Um parágrafo denso e técnico explicando como o funil de vendas será executado para atingir o objetivo: ${profile.objective}.
 
     IMPORTANT: Return EXACTLY a valid JSON object matching the requested schema. No conversational text.
   `;
@@ -133,9 +139,42 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
               frequency: { type: Type.STRING },
               formats: { type: Type.ARRAY, items: { type: Type.STRING } },
               hotTopics: { type: Type.ARRAY, items: { type: Type.STRING } },
-              rationale: { type: Type.STRING }
+              rationale: { type: Type.STRING },
+              funnel: {
+                type: Type.OBJECT,
+                properties: {
+                  tofu: {
+                    type: Type.OBJECT,
+                    properties: {
+                      stage: { type: Type.STRING },
+                      goal: { type: Type.STRING },
+                      contentStrategy: { type: Type.STRING }
+                    },
+                    required: ["stage", "goal", "contentStrategy"]
+                  },
+                  mofu: {
+                    type: Type.OBJECT,
+                    properties: {
+                      stage: { type: Type.STRING },
+                      goal: { type: Type.STRING },
+                      contentStrategy: { type: Type.STRING }
+                    },
+                    required: ["stage", "goal", "contentStrategy"]
+                  },
+                  bofu: {
+                    type: Type.OBJECT,
+                    properties: {
+                      stage: { type: Type.STRING },
+                      goal: { type: Type.STRING },
+                      contentStrategy: { type: Type.STRING }
+                    },
+                    required: ["stage", "goal", "contentStrategy"]
+                  }
+                },
+                required: ["tofu", "mofu", "bofu"]
+              }
             },
-            required: ["idealTypes", "frequency", "formats", "hotTopics", "rationale"]
+            required: ["idealTypes", "frequency", "formats", "hotTopics", "rationale", "funnel"]
           },
           summary: { type: Type.STRING, description: "Strategic summary of the plan's effectiveness." },
           calendar: {

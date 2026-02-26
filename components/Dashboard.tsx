@@ -41,16 +41,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     setIsRenaming(false);
   };
 
-  const handleJSONExport = () => {
-    const project: Project = {
-      id: 'export',
-      projectName: tempProjectName,
-      createdAt: new Date().toISOString(),
-      profile: profile,
-      plan: plan
-    };
-    storageService.exportPlanAsJSON(project);
-  };
 
   const CopyButton = ({ text }: { text: string }) => (
     <button
@@ -175,9 +165,9 @@ const Dashboard: React.FC<DashboardProps> = ({
         ))}
       </div>
 
-      <div className="main-content-area">
+      <div className="main-content-area space-y-12">
         {/* Canais */}
-        {(activeTab === 'canais' || window.matchMedia('print').matches) && (
+        <div className={activeTab === 'canais' ? 'block' : 'hidden print-block'}>
           <div className="space-y-8 animate-in fade-in duration-500 page-break">
             <div className="bg-white/50 dark:bg-black/10 border border-black/5 dark:border-white/5 p-10 rounded-[2.5rem] shadow-xl dark:shadow-none">
               <h2 className="text-3xl font-black text-slate-900 dark:text-stratyx-white mb-2 tracking-tighter">ADAPTAÇÕES MULTIPLATAFORMA</h2>
@@ -229,10 +219,10 @@ const Dashboard: React.FC<DashboardProps> = ({
               ))}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Calendário */}
-        {(activeTab === 'execucao' || window.matchMedia('print').matches) && (
+        <div className={activeTab === 'execucao' ? 'block' : 'hidden print-block'}>
           <div className="animate-in fade-in duration-500 page-break">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
               <div>
@@ -252,8 +242,11 @@ const Dashboard: React.FC<DashboardProps> = ({
                     <span className="text-[10px] font-black text-slate-400 dark:text-slate-600 mb-3 tracking-widest block">DIA {day}</span>
                     <div className="space-y-3">
                       {dayPosts.map((post, idx) => (
-                        <div key={idx} onClick={() => setSelectedPost(post)} className="p-2 bg-slate-100 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5 hover:bg-white/10 transition-all">
-                          <p className="text-[10px] font-black text-slate-900 dark:text-stratyx-white leading-tight line-clamp-2 uppercase mb-2">{post.topic}</p>
+                        <div key={idx} onClick={() => setSelectedPost(post)} className={`p-2 bg-slate-100 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5 hover:bg-white/10 transition-all border-l-4 ${post.funnelStage === 'BoFu' ? 'border-l-purple-500' : post.funnelStage === 'MoFu' ? 'border-l-cyan-400' : 'border-l-stratyx-green'}`}>
+                          <div className="flex justify-between items-start mb-1">
+                            <p className="text-[10px] font-black text-slate-900 dark:text-stratyx-white leading-tight line-clamp-2 uppercase">{post.topic}</p>
+                            <span className="text-[8px] font-black opacity-50">{post.funnelStage}</span>
+                          </div>
                           {getPlatformIcon(post.platform)}
                         </div>
                       ))}
@@ -263,10 +256,10 @@ const Dashboard: React.FC<DashboardProps> = ({
               })}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Marca */}
-        {(activeTab === 'marca' || window.matchMedia('print').matches) && (
+        <div className={activeTab === 'marca' ? 'block' : 'hidden print-block'}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-500 page-break">
             <div className="bg-white/50 dark:bg-black/20 p-10 rounded-[2.5rem] border border-black/5 dark:border-white/5 shadow-xl dark:shadow-none">
               <h3 className="font-black text-slate-400 dark:text-slate-500 uppercase text-[10px] tracking-widest mb-6">Identidade de Bio</h3>
@@ -278,10 +271,10 @@ const Dashboard: React.FC<DashboardProps> = ({
               <p className="text-4xl font-black tracking-tighter leading-tight">{plan.identity.promise}</p>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Estratégia (conteudo) */}
-        {(activeTab === 'conteudo' || window.matchMedia('print').matches) && (
+        <div className={activeTab === 'conteudo' ? 'block' : 'hidden print-block'}>
           <div className="space-y-8 animate-in fade-in duration-500 page-break">
             <div className="bg-white/50 dark:bg-black/20 p-10 rounded-[2.5rem] border border-black/5 dark:border-white/5 shadow-xl dark:shadow-none">
               <h2 className="text-3xl font-black text-slate-900 dark:text-stratyx-white mb-6 uppercase tracking-tighter">Diretrizes Estratégicas</h2>
@@ -309,10 +302,74 @@ const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
           </div>
-        )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* ToFu */}
+            <div className="bg-white/50 dark:bg-black/20 p-8 rounded-[2.5rem] border-l-4 border-l-stratyx-green border border-black/5 dark:border-white/5 shadow-xl transition-all hover:scale-[1.02] avoid-break">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-stratyx-green/20 rounded-2xl flex items-center justify-center text-stratyx-green font-black">▽</div>
+                <div>
+                  <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">TOFU</h4>
+                  <p className="font-black text-slate-900 dark:text-stratyx-white uppercase tracking-tighter">Topo de Funil</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <span className="text-[9px] font-black text-stratyx-green uppercase">Objetivo</span>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{plan.strategy.funnel?.tofu.goal || 'Fase de Descoberta e Atração'}</p>
+                </div>
+                <div className="pt-4 border-t border-black/5 dark:border-white/5">
+                  <span className="text-[9px] font-black text-slate-500 uppercase">Estratégia de Conteúdo</span>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">"{plan.strategy.funnel?.tofu.contentStrategy || 'Conteúdos educativos e materiais ricos.'}"</p>
+                </div>
+              </div>
+            </div>
+
+            {/* MoFu */}
+            <div className="bg-white/50 dark:bg-black/20 p-8 rounded-[2.5rem] border-l-4 border-l-cyan-400 border border-black/5 dark:border-white/5 shadow-xl transition-all hover:scale-[1.02] avoid-break">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-400/20 rounded-2xl flex items-center justify-center text-cyan-400 font-black">▯</div>
+                <div>
+                  <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">MOFU</h4>
+                  <p className="font-black text-slate-900 dark:text-stratyx-white uppercase tracking-tighter">Meio de Funil</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <span className="text-[9px] font-black text-cyan-400 uppercase">Objetivo</span>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{plan.strategy.funnel?.mofu.goal || 'Fase de Consideração e Nutrição'}</p>
+                </div>
+                <div className="pt-4 border-t border-black/5 dark:border-white/5">
+                  <span className="text-[9px] font-black text-slate-500 uppercase">Estratégia de Conteúdo</span>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">"{plan.strategy.funnel?.mofu.contentStrategy || 'Nutrição e qualificação de leads.'}"</p>
+                </div>
+              </div>
+            </div>
+
+            {/* BoFu */}
+            <div className="bg-white/50 dark:bg-black/20 p-8 rounded-[2.5rem] border-l-4 border-l-purple-500 border border-black/5 dark:border-white/5 shadow-xl transition-all hover:scale-[1.02] avoid-break">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-2xl flex items-center justify-center text-purple-500 font-black">☆</div>
+                <div>
+                  <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">BOFU</h4>
+                  <p className="font-black text-slate-900 dark:text-stratyx-white uppercase tracking-tighter">Fundo de Funil</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <span className="text-[9px] font-black text-purple-500 uppercase">Objetivo</span>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{plan.strategy.funnel?.bofu.goal || 'Fase de Decisão e Fechamento'}</p>
+                </div>
+                <div className="pt-4 border-t border-black/5 dark:border-white/5">
+                  <span className="text-[9px] font-black text-slate-500 uppercase">Estratégia de Conteúdo</span>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">"{plan.strategy.funnel?.bofu.contentStrategy || 'Ofertas irresistíveis e prova social.'}"</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> {/* Fechamento da aba Conteúdo/Estratégia */}
 
         {/* Concorrentes (concorrencia) */}
-        {(activeTab === 'concorrencia' || window.matchMedia('print').matches) && (
+        <div className={activeTab === 'concorrencia' ? 'block' : 'hidden print-block'}>
           <div className="animate-in fade-in duration-500 page-break">
             <h2 className="text-3xl font-black text-slate-900 dark:text-stratyx-white mb-8 tracking-tighter uppercase">MAPA DE RIVAIS & OPORTUNIDADES</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -338,20 +395,21 @@ const Dashboard: React.FC<DashboardProps> = ({
               ))}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Configurações */}
-        {activeTab === 'config' && (
-          <div className="animate-in fade-in duration-500">
+        <div className={activeTab === 'config' ? 'block' : 'hidden print-block'}>
+          <div className="animate-in fade-in duration-500 page-break">
             <div className="bg-white/70 dark:bg-black/20 p-10 rounded-[2.5rem] border border-black/5 dark:border-white/5 max-w-2xl mx-auto shadow-2xl">
-              <h2 className="text-3xl font-black text-slate-900 dark:text-stratyx-white mb-2 tracking-tighter uppercase">CONFIGURAÇÕES ESTRATÉGICAS</h2>
-              <p className="text-slate-500 mb-10 font-medium">Ajuste o motor STRATYX para novos objetivos.</p>
+              <h2 className="text-3xl font-black text-slate-900 dark:text-stratyx-white mb-2 tracking-tighter uppercase">PARÂMETROS ESTRATÉGICOS</h2>
+              <p className="text-slate-500 mb-10 font-medium no-print">Ajuste o motor STRATYX para novos objetivos.</p>
 
               <div className="space-y-8 text-left">
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Objetivo Principal</label>
+                  <div className="print-only text-lg font-bold text-slate-900">{editProfile.objective === 'vender' ? 'Conversão Bruta (Vendas)' : editProfile.objective === 'atrair' ? 'Expansão de Audiência (Atrair)' : 'Posicionamento de Autoridade'}</div>
                   <select
-                    className="w-full p-4 bg-black/5 dark:bg-black/40 rounded-2xl border-2 border-black/5 dark:border-white/5 text-slate-900 dark:text-stratyx-white font-bold outline-none focus:border-stratyx-green transition-all"
+                    className="no-print w-full p-4 bg-black/5 dark:bg-black/40 rounded-2xl border-2 border-black/5 dark:border-white/5 text-slate-900 dark:text-stratyx-white font-bold outline-none focus:border-stratyx-green transition-all"
                     value={editProfile.objective}
                     onChange={e => setEditProfile({ ...editProfile, objective: e.target.value as any })}
                   >
@@ -363,8 +421,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Momento do Negócio</label>
+                  <div className="print-only text-lg font-bold text-slate-900">{editProfile.businessStage === 'iniciando' ? 'Iniciando do Zero' : editProfile.businessStage === 'reposicionando' ? 'Mudança de Direção (Pivot)' : 'Pronto para Escalar'}</div>
                   <select
-                    className="w-full p-4 bg-black/5 dark:bg-black/40 rounded-2xl border-2 border-black/5 dark:border-white/5 text-slate-900 dark:text-stratyx-white font-bold outline-none focus:border-stratyx-green transition-all"
+                    className="no-print w-full p-4 bg-black/5 dark:bg-black/40 rounded-2xl border-2 border-black/5 dark:border-white/5 text-slate-900 dark:text-stratyx-white font-bold outline-none focus:border-stratyx-green transition-all"
                     value={editProfile.businessStage}
                     onChange={e => setEditProfile({ ...editProfile, businessStage: e.target.value as any })}
                   >
@@ -376,8 +435,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Tom de Voz & Estilo</label>
+                  <div className="print-only text-lg font-bold text-slate-900">{editProfile.style === 'popular' ? 'Impacto Direto (Popular)' : editProfile.style === 'descontraido' ? 'Criatividade Disruptiva (Descontraído)' : 'Executivo Premium (Sério)'}</div>
                   <select
-                    className="w-full p-4 bg-black/5 dark:bg-black/40 rounded-2xl border-2 border-black/5 dark:border-white/5 text-slate-900 dark:text-stratyx-white font-bold outline-none focus:border-stratyx-green transition-all"
+                    className="no-print w-full p-4 bg-black/5 dark:bg-black/40 rounded-2xl border-2 border-black/5 dark:border-white/5 text-slate-900 dark:text-stratyx-white font-bold outline-none focus:border-stratyx-green transition-all"
                     value={editProfile.style}
                     onChange={e => setEditProfile({ ...editProfile, style: e.target.value as any })}
                   >
@@ -388,85 +448,91 @@ const Dashboard: React.FC<DashboardProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Frequência Diária ({editProfile.postsPerDay} posts)</label>
-                  <input
-                    type="range" min="1" max="5"
-                    className="w-full accent-stratyx-green mb-2"
-                    value={editProfile.postsPerDay}
-                    onChange={e => setEditProfile({ ...editProfile, postsPerDay: parseInt(e.target.value) })}
-                  />
+                  <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Frequência Diária</label>
+                  <div className="print-only text-lg font-bold text-slate-900">{editProfile.postsPerDay} posts por dia</div>
+                  <div className="no-print">
+                    <input
+                      type="range" min="1" max="5"
+                      className="w-full accent-stratyx-green mb-2"
+                      value={editProfile.postsPerDay}
+                      onChange={e => setEditProfile({ ...editProfile, postsPerDay: parseInt(e.target.value) })}
+                    />
+                    <p className="text-[10px] font-bold text-slate-400 uppercase">{editProfile.postsPerDay} posts por dia</p>
+                  </div>
                 </div>
 
-                <div className="pt-6">
+                <div className="pt-6 no-print">
                   <button
                     onClick={() => onUpdateProfile(editProfile)}
                     className="w-full bg-gradient-to-r from-stratyx-green to-emerald-400 text-slate-950 py-5 rounded-[2rem] font-black text-lg hover:brightness-110 shadow-xl shadow-stratyx-green/20 transition-all"
                   >
                     REGENERAR ESTRATÉGIA COMPLETA 🚀
                   </button>
-                  <p className="text-center text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-4">
-                    ⚠️ Ao regenerar, o calendário atual será substituído pela nova estratégia.
-                  </p>
                 </div>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </div> {/* Fechamento da main-content-area */}
 
       {/* Modal Detalhe */}
-      {selectedPost && (
-        <div className="fixed inset-0 bg-slate-100/90 dark:bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 no-print transition-all">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden max-h-[95vh] flex flex-col border border-black/5 dark:border-white/10 transition-all">
-            <div className="p-8 border-b border-black/5 dark:border-white/5 flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                {getPlatformIcon(selectedPost.platform)}
-                <h4 className="font-black text-slate-900 dark:text-stratyx-white uppercase text-lg">Detalhes do Post</h4>
-              </div>
-              <button onClick={() => setSelectedPost(null)} className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 rounded-full transition-colors leading-none">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
-            <div className="p-10 overflow-y-auto space-y-8">
-              <section>
-                <label className="block text-[10px] font-black text-stratyx-green uppercase mb-2">Tópico</label>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-stratyx-white leading-tight">{selectedPost.topic}</h3>
-                {selectedPost.reelsMetadata && (
-                  <div className="mt-4 p-4 bg-stratyx-green/5 border border-stratyx-green/10 rounded-2xl">
-                    <p className="text-xs text-stratyx-green font-black">Gancho: {selectedPost.reelsMetadata.hook3s}</p>
+      {
+        selectedPost && (
+          <div className="fixed inset-0 bg-slate-100/90 dark:bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 no-print transition-all">
+            <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden max-h-[95vh] flex flex-col border border-black/5 dark:border-white/10 transition-all">
+              <div className="p-8 border-b border-black/5 dark:border-white/5 flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                  {getPlatformIcon(selectedPost.platform)}
+                  <div className="flex flex-col">
+                    <h4 className="font-black text-slate-900 dark:text-stratyx-white uppercase text-lg leading-tight">Detalhes do Post</h4>
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${selectedPost.funnelStage === 'BoFu' ? 'text-purple-500' : selectedPost.funnelStage === 'MoFu' ? 'text-cyan-400' : 'text-stratyx-green'}`}>Etapa: {selectedPost.funnelStage}</span>
                   </div>
-                )}
-              </section>
-              <section>
-                <div className="flex justify-between items-center mb-3"><label className="text-[10px] font-black text-slate-500 uppercase">Legenda Estratégica</label><CopyButton text={selectedPost.caption} /></div>
-                <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl text-slate-700 dark:text-stratyx-white text-sm leading-relaxed italic border border-black/5 shadow-inner">{selectedPost.caption}</div>
-              </section>
-            </div>
-            <div className="p-8 bg-slate-50 dark:bg-black/50 border-t border-black/5 dark:border-white/10 flex gap-4">
-              <button
-                onClick={async () => {
-                  if (selectedPost) {
-                    setIsRegenerating(true);
-                    try {
-                      const newPost = await onRegeneratePost(selectedPost);
-                      setSelectedPost(newPost);
-                    } finally {
-                      setIsRegenerating(false);
+                </div>
+                <button onClick={() => setSelectedPost(null)} className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 rounded-full transition-colors leading-none">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <div className="p-10 overflow-y-auto space-y-8">
+                <section>
+                  <label className="block text-[10px] font-black text-stratyx-green uppercase mb-2">Tópico</label>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-stratyx-white leading-tight">{selectedPost.topic}</h3>
+                  {selectedPost.reelsMetadata && (
+                    <div className="mt-4 p-4 bg-stratyx-green/5 border border-stratyx-green/10 rounded-2xl">
+                      <p className="text-xs text-stratyx-green font-black">Gancho: {selectedPost.reelsMetadata.hook3s}</p>
+                    </div>
+                  )}
+                </section>
+                <section>
+                  <div className="flex justify-between items-center mb-3"><label className="text-[10px] font-black text-slate-500 uppercase">Legenda Estratégica</label><CopyButton text={selectedPost.caption} /></div>
+                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl text-slate-700 dark:text-stratyx-white text-sm leading-relaxed italic border border-black/5 shadow-inner">{selectedPost.caption}</div>
+                </section>
+              </div>
+              <div className="p-8 bg-slate-50 dark:bg-black/50 border-t border-black/5 dark:border-white/10 flex gap-4">
+                <button
+                  onClick={async () => {
+                    if (selectedPost) {
+                      setIsRegenerating(true);
+                      try {
+                        const newPost = await onRegeneratePost(selectedPost);
+                        setSelectedPost(newPost);
+                      } finally {
+                        setIsRegenerating(false);
+                      }
                     }
-                  }
-                }}
-                disabled={isRegenerating}
-                className="flex-1 py-5 rounded-[2rem] font-bold text-slate-500 hover:text-slate-900 dark:hover:text-stratyx-white transition-all bg-white/50 dark:bg-white/5 border border-black/10 dark:border-white/10 disabled:opacity-50"
-              >
-                {isRegenerating ? 'CRIANDO NOVO INSIGHT...' : 'REFAZER ESTA IDÉIA ↺'}
-              </button>
-              <button onClick={() => { onTogglePostStatus(selectedPost.id); setSelectedPost(null); }} className={`flex-[1.5] py-5 rounded-[2rem] font-black text-lg transition-all ${selectedPost.status === 'posted' ? 'bg-slate-200 dark:bg-slate-800 text-slate-500' : 'bg-stratyx-green text-slate-950 shadow-2xl hover:brightness-110'}`}>
-                {selectedPost.status === 'posted' ? 'Marcar como Pendente' : 'Marcar como Publicado ✓'}
-              </button>
+                  }}
+                  disabled={isRegenerating}
+                  className="flex-1 py-5 rounded-[2rem] font-bold text-slate-500 hover:text-slate-900 dark:hover:text-stratyx-white transition-all bg-white/50 dark:bg-white/5 border border-black/10 dark:border-white/10 disabled:opacity-50"
+                >
+                  {isRegenerating ? 'CRIANDO NOVO INSIGHT...' : 'REFAZER ESTA IDÉIA ↺'}
+                </button>
+                <button onClick={() => { onTogglePostStatus(selectedPost.id); setSelectedPost(null); }} className={`flex-[1.5] py-5 rounded-[2rem] font-black text-lg transition-all ${selectedPost.status === 'posted' ? 'bg-slate-200 dark:bg-slate-800 text-slate-500' : 'bg-stratyx-green text-slate-950 shadow-2xl hover:brightness-110'}`}>
+                  {selectedPost.status === 'posted' ? 'Marcar como Pendente' : 'Marcar como Publicado ✓'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
   );
 };
