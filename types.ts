@@ -10,8 +10,9 @@ export interface BusinessProfile {
   selectedPlatforms: Platform[]; // User choice
   postsPerDay: number; // Frequency
   selectedDaysOfWeek: string[]; // ['Segunda', 'Quarta', ...]
-  logoUrl?: string; 
-  manualColors?: string[]; 
+  businessStage: 'iniciando' | 'reposicionando' | 'escalando';
+  logoUrl?: string;
+  manualColors?: string[];
 }
 
 export interface BrandIdentity {
@@ -23,12 +24,31 @@ export interface BrandIdentity {
   visualStyle: string;
 }
 
+export interface SalesFunnel {
+  tofu: {
+    stage: string;
+    goal: string;
+    contentStrategy: string;
+  };
+  mofu: {
+    stage: string;
+    goal: string;
+    contentStrategy: string;
+  };
+  bofu: {
+    stage: string;
+    goal: string;
+    contentStrategy: string;
+  };
+}
+
 export interface ContentStrategy {
   idealTypes: string[];
   frequency: string;
   formats: string[];
   hotTopics: string[];
   rationale: string;
+  funnel: SalesFunnel;
 }
 
 export type Platform = 'Instagram' | 'TikTok' | 'LinkedIn' | 'WhatsApp' | 'YouTube Shorts';
@@ -52,6 +72,7 @@ export interface PostItem {
   status: 'pending' | 'posted';
   isTrend?: boolean;
   dayOfMonth: number;
+  funnelStage: 'ToFu' | 'MoFu' | 'BoFu';
   reelsMetadata?: ReelsMetadata;
 }
 

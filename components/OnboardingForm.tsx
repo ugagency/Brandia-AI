@@ -22,6 +22,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
     selectedPlatforms: ['Instagram', 'TikTok'],
     postsPerDay: 1,
     selectedDaysOfWeek: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+    businessStage: 'iniciando',
     manualColors: []
   });
 
@@ -39,7 +40,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
     reader.onload = async (event) => {
       const base64 = event.target?.result as string;
       setProfile(prev => ({ ...prev, logoUrl: base64 }));
-      
+
       setExtractingColors(true);
       try {
         const colors = await extractColorsFromLogo(base64);
@@ -59,8 +60,8 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
       if (exists && prev.selectedPlatforms.length === 1) return prev; // Keep at least one
       return {
         ...prev,
-        selectedPlatforms: exists 
-          ? prev.selectedPlatforms.filter(item => item !== p) 
+        selectedPlatforms: exists
+          ? prev.selectedPlatforms.filter(item => item !== p)
           : [...prev.selectedPlatforms, p]
       };
     });
@@ -72,8 +73,8 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
       if (exists && prev.selectedDaysOfWeek.length === 1) return prev;
       return {
         ...prev,
-        selectedDaysOfWeek: exists 
-          ? prev.selectedDaysOfWeek.filter(item => item !== day) 
+        selectedDaysOfWeek: exists
+          ? prev.selectedDaysOfWeek.filter(item => item !== day)
           : [...prev.selectedDaysOfWeek, day]
       };
     });
@@ -84,20 +85,20 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
     onSubmit(profile);
   };
 
-  const inputClasses = "w-full p-5 bg-black/40 rounded-2xl border-2 border-white/5 focus:border-stratyx-green focus:ring-0 outline-none transition-all text-stratyx-white font-medium text-lg placeholder:text-slate-600";
-  const textareaClasses = "w-full p-5 bg-black/40 rounded-2xl border-2 border-white/5 focus:border-stratyx-green focus:ring-0 outline-none transition-all text-stratyx-white font-medium text-lg min-h-[150px] placeholder:text-slate-600";
+  const inputClasses = "w-full p-5 bg-black/5 dark:bg-black/40 rounded-2xl border-2 border-black/5 dark:border-white/5 focus:border-stratyx-green focus:ring-0 outline-none transition-all text-slate-900 dark:text-stratyx-white font-medium text-lg placeholder:text-slate-400 dark:placeholder:text-slate-600";
+  const textareaClasses = "w-full p-5 bg-black/5 dark:bg-black/40 rounded-2xl border-2 border-black/5 dark:border-white/5 focus:border-stratyx-green focus:ring-0 outline-none transition-all text-slate-900 dark:text-stratyx-white font-medium text-lg min-h-[150px] placeholder:text-slate-400 dark:placeholder:text-slate-600";
   const labelClasses = "block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-[0.2em]";
 
   const totalSteps = 6;
 
   return (
-    <div className="max-w-xl mx-auto bg-black/20 backdrop-blur-xl rounded-[3rem] shadow-2xl border border-white/5 overflow-hidden p-10 md:p-14">
+    <div className="max-w-xl mx-auto bg-white/70 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] shadow-2xl border border-black/5 dark:border-white/5 overflow-hidden p-10 md:p-14 transition-all">
       <div className="mb-12 text-center">
-        <h2 className="text-3xl font-black text-stratyx-white mb-2 tracking-tighter uppercase">STRATEGIC SCAN</h2>
+        <h2 className="text-3xl font-black text-slate-900 dark:text-stratyx-white mb-2 tracking-tighter uppercase">STRATEGIC SCAN</h2>
         <p className="text-slate-500 font-medium">Configure seu motor de crescimento.</p>
         <div className="mt-8 flex justify-center gap-3">
           {Array.from({ length: totalSteps }).map((_, i) => (
-            <div key={i} className={`h-1.5 w-10 rounded-full transition-all duration-500 ${step > i ? 'bg-stratyx-green' : 'bg-white/10'}`} />
+            <div key={i} className={`h-1.5 w-10 rounded-full transition-all duration-500 ${step > i ? 'bg-stratyx-green' : 'bg-black/10 dark:bg-white/10'}`} />
           ))}
         </div>
       </div>
@@ -107,12 +108,12 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
               <label className={labelClasses}>Identidade Visual</label>
-              <div className="flex items-center gap-6 p-6 bg-black/30 rounded-3xl border border-white/5">
-                <div className="w-24 h-24 border-2 border-dashed border-white/10 rounded-3xl flex items-center justify-center overflow-hidden bg-black relative group">
+              <div className="flex items-center gap-6 p-6 bg-black/5 dark:bg-black/30 rounded-3xl border border-black/5 dark:border-white/5">
+                <div className="w-24 h-24 border-2 border-dashed border-black/10 dark:border-white/10 rounded-3xl flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-black relative group">
                   {profile.logoUrl ? (
                     <img src={profile.logoUrl} className="w-full h-full object-contain" alt="Logo preview" />
                   ) : (
-                    <svg className="w-10 h-10 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <svg className="w-10 h-10 text-slate-400 dark:text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                   )}
                   <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-input" />
                   <label htmlFor="logo-input" className="absolute inset-0 cursor-pointer bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
@@ -120,7 +121,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
                   </label>
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-stratyx-white font-black uppercase text-xs tracking-tighter mb-1">Logotipo</h4>
+                  <h4 className="text-slate-900 dark:text-stratyx-white font-black uppercase text-xs tracking-tighter mb-1">Logotipo</h4>
                   <p className="text-[10px] text-slate-500 leading-snug">Extração automática de cores via IA.</p>
                   {extractingColors && <p className="text-[10px] text-stratyx-green font-black mt-3 animate-pulse uppercase tracking-widest">Calibrando...</p>}
                 </div>
@@ -128,7 +129,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
             </div>
             <div>
               <label className={labelClasses}>Nome da Marca</label>
-              <input required type="text" placeholder="Ex: Stratyx Corp" className={inputClasses} value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
+              <input required type="text" placeholder="Ex: Stratyx Corp" className={inputClasses} value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} />
             </div>
             <button type="button" onClick={nextStep} className="w-full bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black text-lg hover:brightness-110 shadow-xl shadow-stratyx-green/10 transition-all">PRÓXIMO</button>
           </div>
@@ -138,14 +139,14 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
               <label className={labelClasses}>Nicho & Mecânica</label>
-              <input required type="text" placeholder="Ex: Ecommerce de Moda, Consultoria Financeira" className={inputClasses} value={profile.businessType} onChange={e => setProfile({...profile, businessType: e.target.value})} />
+              <input required type="text" placeholder="Ex: Ecommerce de Moda, Consultoria Financeira" className={inputClasses} value={profile.businessType} onChange={e => setProfile({ ...profile, businessType: e.target.value })} />
             </div>
             <div>
               <label className={labelClasses}>Descrição do Produto</label>
-              <textarea required placeholder="Quais os diferenciais e o que torna seu produto dominante?" className={textareaClasses} value={profile.productDescription} onChange={e => setProfile({...profile, productDescription: e.target.value})} />
+              <textarea required placeholder="Quais os diferenciais e o que torna seu produto dominante?" className={textareaClasses} value={profile.productDescription} onChange={e => setProfile({ ...profile, productDescription: e.target.value })} />
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={prevStep} className="flex-1 bg-black/5 dark:bg-white/5 border-2 border-black/5 dark:border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
               <button type="button" onClick={nextStep} className="flex-[2] bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-stratyx-green/10">CONTINUAR</button>
             </div>
           </div>
@@ -155,14 +156,14 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
               <label className={labelClasses}>Alvo & Região</label>
-              <input required type="text" placeholder="Ex: Profissionais liberais, Brasil" className={inputClasses} value={profile.targetAudience} onChange={e => setProfile({...profile, targetAudience: e.target.value})} />
+              <input required type="text" placeholder="Ex: Profissionais liberais, Brasil" className={inputClasses} value={profile.targetAudience} onChange={e => setProfile({ ...profile, targetAudience: e.target.value })} />
             </div>
             <div>
               <label className={labelClasses}>Região Geográfica</label>
-              <input required type="text" placeholder="Ex: Nacional, São Paulo" className={inputClasses} value={profile.region} onChange={e => setProfile({...profile, region: e.target.value})} />
+              <input required type="text" placeholder="Ex: Nacional, São Paulo" className={inputClasses} value={profile.region} onChange={e => setProfile({ ...profile, region: e.target.value })} />
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={prevStep} className="flex-1 bg-black/5 dark:bg-white/5 border-2 border-black/5 dark:border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
               <button type="button" onClick={nextStep} className="flex-[2] bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-stratyx-green/10">CONTINUAR</button>
             </div>
           </div>
@@ -174,11 +175,11 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
               <label className={labelClasses}>Plataformas Desejadas</label>
               <div className="flex flex-wrap gap-2">
                 {platforms.map(p => (
-                  <button 
-                    key={p} 
+                  <button
+                    key={p}
                     type="button"
                     onClick={() => togglePlatform(p)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border-2 ${profile.selectedPlatforms.includes(p) ? 'bg-stratyx-green text-slate-950 border-stratyx-green' : 'bg-black/20 text-slate-500 border-white/5'}`}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border-2 ${profile.selectedPlatforms.includes(p) ? 'bg-stratyx-green text-slate-950 border-stratyx-green' : 'bg-black/5 dark:bg-black/20 text-slate-400 dark:text-slate-500 border-black/5 dark:border-white/5'}`}
                   >
                     {p}
                   </button>
@@ -188,11 +189,11 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
             <div>
               <label className={labelClasses}>Frequência Diária</label>
               <div className="flex items-center gap-4">
-                <input 
-                  type="range" min="1" max="5" 
-                  className="flex-1 accent-stratyx-green" 
-                  value={profile.postsPerDay} 
-                  onChange={e => setProfile({...profile, postsPerDay: parseInt(e.target.value)})} 
+                <input
+                  type="range" min="1" max="5"
+                  className="flex-1 accent-stratyx-green"
+                  value={profile.postsPerDay}
+                  onChange={e => setProfile({ ...profile, postsPerDay: parseInt(e.target.value) })}
                 />
                 <span className="text-xl font-black text-stratyx-green w-10 text-center">{profile.postsPerDay}</span>
               </div>
@@ -201,11 +202,11 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
               <label className={labelClasses}>Dias da Semana</label>
               <div className="flex flex-wrap gap-2">
                 {daysOfWeek.map(day => (
-                  <button 
-                    key={day} 
+                  <button
+                    key={day}
                     type="button"
                     onClick={() => toggleDay(day)}
-                    className={`px-3 py-2 rounded-xl text-[10px] font-bold transition-all border-2 ${profile.selectedDaysOfWeek.includes(day) ? 'bg-stratyx-green text-slate-950 border-stratyx-green' : 'bg-black/20 text-slate-500 border-white/5'}`}
+                    className={`px-3 py-2 rounded-xl text-[10px] font-bold transition-all border-2 ${profile.selectedDaysOfWeek.includes(day) ? 'bg-stratyx-green text-slate-950 border-stratyx-green' : 'bg-black/5 dark:bg-black/20 text-slate-400 dark:text-slate-500 border-black/5 dark:border-white/5'}`}
                   >
                     {day.substring(0, 3)}
                   </button>
@@ -213,7 +214,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
               </div>
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={prevStep} className="flex-1 bg-black/5 dark:bg-white/5 border-2 border-black/5 dark:border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
               <button type="button" onClick={nextStep} className="flex-[2] bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-stratyx-green/10">CONTINUAR</button>
             </div>
           </div>
@@ -223,22 +224,30 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
             <div>
               <label className={labelClasses}>Objetivo de Escala</label>
-              <select className={inputClasses} value={profile.objective} onChange={e => setProfile({...profile, objective: e.target.value as any})}>
+              <select className={inputClasses} value={profile.objective} onChange={e => setProfile({ ...profile, objective: e.target.value as any })}>
                 <option value="vender">Conversão Bruta</option>
                 <option value="atrair">Expansão de Audiência</option>
                 <option value="autoridade">Posicionamento de Autoridade</option>
               </select>
             </div>
             <div>
+              <label className={labelClasses}>Momento do Negócio</label>
+              <select className={inputClasses} value={profile.businessStage} onChange={e => setProfile({ ...profile, businessStage: e.target.value as any })}>
+                <option value="iniciando">Iniciando do Zero (Novo Perfil)</option>
+                <option value="reposicionando">Mudança de Direção / Pivotagem</option>
+                <option value="escalando">Consolidado e Pronto para Escalar</option>
+              </select>
+            </div>
+            <div>
               <label className={labelClasses}>Tom de Voz</label>
-              <select className={inputClasses} value={profile.style} onChange={e => setProfile({...profile, style: e.target.value as any})}>
+              <select className={inputClasses} value={profile.style} onChange={e => setProfile({ ...profile, style: e.target.value as any })}>
                 <option value="popular">Impacto Direto</option>
                 <option value="descontraido">Criatividade Disruptiva</option>
                 <option value="serio">Executivo Premium</option>
               </select>
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={prevStep} className="flex-1 bg-black/5 dark:bg-white/5 border-2 border-black/5 dark:border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
               <button type="button" onClick={nextStep} className="flex-[2] bg-stratyx-green text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-stratyx-green/10">CONTINUAR</button>
             </div>
           </div>
@@ -246,12 +255,12 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onSubmit, isLoading }) 
 
         {step === 6 && (
           <div className="space-y-8 text-left animate-in slide-in-from-right-4 duration-300">
-            <div className="bg-black/40 p-8 rounded-[2rem] border border-white/5 text-center">
+            <div className="bg-black/5 dark:bg-black/40 p-8 rounded-[2rem] border border-black/5 dark:border-white/5 text-center">
               <p className="text-stratyx-green text-sm font-black uppercase tracking-widest mb-2">⚡ PARÂMETROS CONFIGURADOS.</p>
               <p className="text-slate-500 text-xs">O motor STRATYX irá sintetizar seu plano agora.</p>
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={prevStep} className="flex-1 bg-white/5 border-2 border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
+              <button type="button" onClick={prevStep} className="flex-1 bg-black/5 dark:bg-white/5 border-2 border-black/5 dark:border-white/5 py-5 rounded-[2rem] font-black text-slate-400">VOLTAR</button>
               <button disabled={isLoading} type="submit" className="flex-[2] bg-gradient-to-r from-stratyx-green to-emerald-400 text-slate-950 py-5 rounded-[2rem] font-black hover:brightness-110 shadow-xl shadow-stratyx-green/20 disabled:opacity-50">
                 {isLoading ? 'CALCULANDO...' : 'SINTETIZAR ESTRATÉGIA 🚀'}
               </button>

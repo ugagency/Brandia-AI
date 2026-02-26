@@ -74,9 +74,10 @@ const POST_SCHEMA = {
     status: { type: Type.STRING, description: "Must be 'pending'" },
     isTrend: { type: Type.BOOLEAN },
     dayOfMonth: { type: Type.INTEGER },
+    funnelStage: { type: Type.STRING, description: "Must be 'ToFu', 'MoFu', or 'BoFu'" },
     reelsMetadata: REELS_METADATA_SCHEMA
   },
-  required: ["id", "type", "topic", "hook", "caption", "hashtags", "bestTime", "platform", "status", "dayOfMonth"]
+  required: ["id", "type", "topic", "hook", "caption", "hashtags", "bestTime", "platform", "status", "dayOfMonth", "funnelStage"]
 };
 
 export const generateMarketingPlan = async (profile: BusinessProfile): Promise<MarketingPlan> => {
@@ -86,17 +87,25 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
     TIPO DE NEGÓCIO: ${profile.businessType}.
     DESCRIÇÃO DETALHADA DO PRODUTO: ${profile.productDescription}.
     PÚBLICO-ALVO: ${profile.targetAudience} em ${profile.region}.
+    MOMENTO ATUAL: ${profile.businessStage}.
     OBJETIVO: ${profile.objective}. ESTILO: ${profile.style}. 
     PLATAFORMAS SELECIONADAS: ${profile.selectedPlatforms.join(', ')}.
     FREQUÊNCIA: ${profile.postsPerDay} post(s) por dia PARA CADA plataforma selecionada nos dias: ${profile.selectedDaysOfWeek.join(', ')}.
 
     REQUISITOS OBRIGATÓRIOS:
-    1. CALENDÁRIO: Gere o máximo de posts iniciais que puder (mínimo 15), respeitando RIGOROSAMENTE a frequência de ${profile.postsPerDay} posts em CADA plataforma selecionada para os dias escolhidos.
+    1. CALENDÁRIO: Gere um calendário robusto de posts. A regra de frequência é INDIVIDUAL por plataforma. 
+       EXEMPLO: Se selecionou 3 plataformas e 2 posts/dia, você deve gerar 6 posts NO TOTAL para cada dia válido (2 p/ cada rede).
+       Respeite RIGOROSAMENTE a frequência de ${profile.postsPerDay} posts em CADA plataforma selecionada (${profile.selectedPlatforms.join(', ')}) para os dias escolhidos.
     2. GANCHOS E CTAS: Use ganchos de 3s e CTAs agressivos para conversão.
     3. TENDÊNCIAS: Use sua ferramenta de busca para pesquisar tendências REAIS de 2025 para ${profile.businessType} e ${profile.region}.
     4. ESTRATÉGIA (strategy): Detalhe os formatos ideais, frequência e um racional robusto do porquê desta abordagem.
     5. COMPETIDORES: Use a busca para identificar 3 rivais REAIS em ${profile.region} para ${profile.businessType} e preencha a seção competitors com detalhes de seus pontos fracos.
-    6. RESUMO ESTRATÉGICO (summary): Um parágrafo de alto impacto sobre o potencial deste plano.
+    6. FUNIL DE VENDAS (A CORAÇÃO DO PLANO): Aplique a metodologia ToFu, MoFu e BoFu. CADA post do calendário deve ser obrigatoriamente classificado para uma destas etapas.
+       - ToFu (40% dos posts): Atração e Descoberta. Foco em educar e atrair novos olhos.
+       - MoFu (40% dos posts): Consideração e Autoridade. Foco em resolver problemas e criar conexão.
+       - BoFu (20% dos posts): Decisão e Venda. Foco em ofertas, depoimentos e chamadas diretas para ação.
+    7. DETALHAMENTO: As legendas devem ser ricas, estratégicas e prontas para uso, refletindo o tom de voz ${profile.style}.
+    8. RESUMO ESTRATÉGICO (summary): Um parágrafo denso e técnico explicando como o funil de vendas será executado para atingir o objetivo: ${profile.objective}.
 
     IMPORTANT: Return EXACTLY a valid JSON object matching the requested schema. No conversational text.
   `;
@@ -130,9 +139,42 @@ export const generateMarketingPlan = async (profile: BusinessProfile): Promise<M
               frequency: { type: Type.STRING },
               formats: { type: Type.ARRAY, items: { type: Type.STRING } },
               hotTopics: { type: Type.ARRAY, items: { type: Type.STRING } },
-              rationale: { type: Type.STRING }
+              rationale: { type: Type.STRING },
+              funnel: {
+                type: Type.OBJECT,
+                properties: {
+                  tofu: {
+                    type: Type.OBJECT,
+                    properties: {
+                      stage: { type: Type.STRING },
+                      goal: { type: Type.STRING },
+                      contentStrategy: { type: Type.STRING }
+                    },
+                    required: ["stage", "goal", "contentStrategy"]
+                  },
+                  mofu: {
+                    type: Type.OBJECT,
+                    properties: {
+                      stage: { type: Type.STRING },
+                      goal: { type: Type.STRING },
+                      contentStrategy: { type: Type.STRING }
+                    },
+                    required: ["stage", "goal", "contentStrategy"]
+                  },
+                  bofu: {
+                    type: Type.OBJECT,
+                    properties: {
+                      stage: { type: Type.STRING },
+                      goal: { type: Type.STRING },
+                      contentStrategy: { type: Type.STRING }
+                    },
+                    required: ["stage", "goal", "contentStrategy"]
+                  }
+                },
+                required: ["tofu", "mofu", "bofu"]
+              }
             },
-            required: ["idealTypes", "frequency", "formats", "hotTopics", "rationale"]
+            required: ["idealTypes", "frequency", "formats", "hotTopics", "rationale", "funnel"]
           },
           summary: { type: Type.STRING, description: "Strategic summary of the plan's effectiveness." },
           calendar: {
@@ -226,12 +268,13 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
   const existingTopics = existingPosts.map(p => p.topic).slice(-10).join(', ');
 
   const prompt = `
-    Aja como Estrategista de Conteúdo Sênior da STRATYX. Gere mais 15 posts novos para ${profile.name} do dia ${lastDay + 1} em diante.
-    Respeite RIGOROSAMENTE a frequência: ${profile.postsPerDay} post(s) por dia PARA CADA plataforma selecionada: ${profile.selectedPlatforms.join(', ')}.
-    Dias da semana permitidos: ${profile.selectedDaysOfWeek.join(', ')}.
-    Contexto do produto: ${profile.productDescription}.
-    Público: ${profile.targetAudience} em ${profile.region}.
-    NÃO REPITA ESTES TEMAS JÁ USADOS: ${existingTopics}.
+    Aja como Estrategista de Conteúdo Sênior da STRATYX. Gere mais posts novos para ${profile.name} do dia ${lastDay + 1} em diante.
+    REGRA DE OURO: A frequência de ${profile.postsPerDay} posts é POR plataforma individualmente. 
+    Se o usuário escolher 3 canais e 3 posts/dia, você deve gerar 9 itens para este dia.
+    Plataformas: ${profile.selectedPlatforms.join(', ')}.
+    Dias: ${profile.selectedDaysOfWeek.join(', ')}.
+    Contexto: ${profile.productDescription}. Público: ${profile.targetAudience} em ${profile.region}.
+    NÃO REPITA ESTES TEMAS: ${existingTopics}.
     Retorne apenas um array JSON de PostItem.
   `;
 
@@ -251,5 +294,31 @@ export const extendCalendar = async (profile: BusinessProfile, existingPosts: Po
 
   const text = response.text;
   if (!text) throw new Error("Empty response from AI extension");
+  return JSON.parse(text);
+};
+
+export const regenerateSinglePost = async (profile: BusinessProfile, post: PostItem): Promise<PostItem> => {
+  const prompt = `
+    Aja como Estrategista de Conteúdo Sênior da STRATYX. 
+    O usuário não gostou deste post: "${post.topic}".
+    Crie um NOVO post substituto para a mesma plataforma (${post.platform}) e mesmo dia (${post.dayOfMonth}).
+    CONTEXTO DO NEGÓCIO: ${profile.productDescription}.
+    OBJETIVO: ${profile.objective}.
+    O novo post deve ser MAIS criativo, ter um gancho MAIS forte e ser completamente diferente do anterior.
+    Retorne apenas o objeto JSON conforme o schema PostItem.
+  `;
+
+  const ai = getAI();
+  const response = await ai.models.generateContent({
+    model: 'gemini-flash-latest',
+    contents: [{ parts: [{ text: prompt }] }],
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: POST_SCHEMA
+    }
+  });
+
+  const text = response.text;
+  if (!text) throw new Error("Empty response from AI regeneration");
   return JSON.parse(text);
 };
